@@ -1,0 +1,3 @@
+ I want to create a demo environment in AWS using terraform that will showcase the following products:  SUSE Rancher Manager, SUSE Observability, SUSE Security.  I would like a
+  single Git repo for the different products in separate Terraform projects.  The repo should have a single "Shared Services" project as well to build the common infrastructure
+  needed for all the different products

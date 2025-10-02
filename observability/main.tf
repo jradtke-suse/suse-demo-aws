@@ -1,0 +1,201 @@
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = {
+      Environment = var.environment
+      Project     = "suse-demo"
+      Component   = "observability"
+      ManagedBy   = "terraform"
+      Owner       = var.owner
+    }
+  }
+}
+
+# Data source to get shared services outputs
+data "terraform_remote_state" "shared" {
+  backend = "local"
+
+  config = {
+    path = "${path.module}/../shared-services/terraform.tfstate"
+  }
+}
+
+# Get latest SLES AMI
+data "aws_ami" "sles" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["suse-sles-15-sp*-v*-hvm-ssd-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# Security Group for Observability
+resource "aws_security_group" "observability" {
+  name_prefix = "${var.environment}-observability-"
+  description = "Security group for SUSE Observability"
+  vpc_id      = data.terraform_remote_state.shared.outputs.vpc_id
+
+  # Observability UI
+  ingress {
+    description = "Observability UI"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_cidr_blocks
+  }
+
+  ingress {
+    description = "Observability UI HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_cidr_blocks
+  }
+
+  # Prometheus
+  ingress {
+    description = "Prometheus"
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_cidr_blocks
+  }
+
+  # Grafana
+  ingress {
+    description = "Grafana"
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_cidr_blocks
+  }
+
+  # AlertManager
+  ingress {
+    description = "AlertManager"
+    from_port   = 9093
+    to_port     = 9093
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_cidr_blocks
+  }
+
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.environment}-observability-sg"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# IAM Role for Observability
+resource "aws_iam_role" "observability" {
+  name_prefix = "${var.environment}-observability-"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.environment}-observability-role"
+  }
+}
+
+# IAM Instance Profile
+resource "aws_iam_instance_profile" "observability" {
+  name_prefix = "${var.environment}-observability-"
+  role        = aws_iam_role.observability.name
+}
+
+# Attach SSM policy for remote management
+resource "aws_iam_role_policy_attachment" "observability_ssm" {
+  role       = aws_iam_role.observability.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# Key Pair
+resource "aws_key_pair" "observability" {
+  count      = var.ssh_public_key != "" ? 1 : 0
+  key_name   = "${var.environment}-observability-key"
+  public_key = var.ssh_public_key
+
+  tags = {
+    Name = "${var.environment}-observability-key"
+  }
+}
+
+# EC2 Instance for Observability
+resource "aws_instance" "observability" {
+  ami                    = var.ami_id != "" ? var.ami_id : data.aws_ami.sles.id
+  instance_type          = var.instance_type
+  subnet_id              = data.terraform_remote_state.shared.outputs.public_subnet_ids[0]
+  key_name               = var.ssh_public_key != "" ? aws_key_pair.observability[0].key_name : null
+  iam_instance_profile   = aws_iam_instance_profile.observability.name
+  vpc_security_group_ids = [
+    aws_security_group.observability.id,
+    data.terraform_remote_state.shared.outputs.ssh_security_group_id,
+    data.terraform_remote_state.shared.outputs.internal_security_group_id
+  ]
+
+  root_block_device {
+    volume_size           = var.root_volume_size
+    volume_type           = "gp3"
+    delete_on_termination = true
+    encrypted             = true
+  }
+
+  user_data = templatefile("${path.module}/user-data.sh", {
+    grafana_admin_password = var.grafana_admin_password
+  })
+
+  tags = {
+    Name = "${var.environment}-suse-observability"
+  }
+}
+
+# Elastic IP for Observability
+resource "aws_eip" "observability" {
+  count    = var.create_eip ? 1 : 0
+  instance = aws_instance.observability.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "${var.environment}-observability-eip"
+  }
+}

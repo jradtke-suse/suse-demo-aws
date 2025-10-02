@@ -1,0 +1,30 @@
+# Copy this file to terraform.tfvars and customize as needed
+
+aws_region  = "us-west-2"
+environment = "demo"
+owner       = "your-name"
+
+# Instance configuration
+instance_type     = "t3.xlarge" # Minimum recommended for Rancher
+root_volume_size  = 100
+
+# SSH access (paste your public SSH key)
+ssh_public_key = ""
+
+# Network access - IMPORTANT: Restrict to your IP for security
+allowed_cidr_blocks = ["0.0.0.0/0"]
+
+# Create Elastic IP for stable public IP
+create_eip = true
+
+# Rancher configuration
+rancher_version      = "2.9.2"
+cert_manager_version = "1.15.3"
+rancher_hostname     = "" # Leave empty to use IP-based hostname
+
+# Route53 DNS Configuration (optional)
+# Set create_route53_record = true to create a DNS record
+create_route53_record = false
+domain_name          = ""           # e.g., "example.com"
+rancher_subdomain    = "rancher"    # Will create rancher.example.com
+route53_zone_id      = ""           # Leave empty to auto-discover by domain_name

@@ -1,0 +1,21 @@
+# Copy this file to terraform.tfvars and customize as needed
+
+aws_region  = "us-west-2"
+environment = "demo"
+owner       = "your-name"
+
+# Instance configuration
+instance_type    = "t3.large" # Sufficient for demo observability stack
+root_volume_size = 100
+
+# SSH access (paste your public SSH key)
+ssh_public_key = ""
+
+# Network access - IMPORTANT: Restrict to your IP for security
+allowed_cidr_blocks = ["0.0.0.0/0"]
+
+# Create Elastic IP for stable public IP
+create_eip = true
+
+# Grafana admin password - CHANGE THIS!
+grafana_admin_password = "admin"
