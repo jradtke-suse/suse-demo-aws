@@ -1,6 +1,6 @@
 # Copy this file to terraform.tfvars and customize as needed
 
-aws_region  = "us-west-2"
+aws_region  = "us-east-2"
 environment = "demo"
 owner       = "your-name"
 

@@ -1,10 +1,10 @@
 # Copy this file to terraform.tfvars and customize as needed
 
-aws_region         = "us-west-2"
+aws_region         = "us-east-2"
 environment        = "demo"
 owner              = "your-name"
 vpc_cidr           = "10.0.0.0/16"
-availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
+availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
 
 # Set to false to reduce costs (instances in private subnets won't have internet access)
 enable_nat_gateway = true
