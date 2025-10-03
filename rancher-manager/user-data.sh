@@ -15,9 +15,11 @@ echo "Registering SLES 15 system with SUSE Customer Center..."
 # Register the system with SUSE Customer Center
 if [ -n "$SMT_URL" ]; then
     # Register with SMT/RMT server
+    echo "SUSEConnect --url \"$SMT_URL\" --regcode \"$SUSE_REGCODE\" --email \"$SUSE_EMAIL\" "
     SUSEConnect --url "$SMT_URL" --regcode "$SUSE_REGCODE" --email "$SUSE_EMAIL"
 else
     # Register with SUSE Customer Center (default)
+    echo "SUSEConnect --regcode \"$SUSE_REGCODE\" --email \"$SUSE_EMAIL\" "
     SUSEConnect --regcode "$SUSE_REGCODE" --email "$SUSE_EMAIL"
 fi
 
