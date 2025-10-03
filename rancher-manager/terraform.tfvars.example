@@ -17,9 +17,13 @@ instance_type     = "t3.xlarge" # Minimum recommended for Rancher
 root_volume_size  = 100
 
 # SSH access (paste your public SSH key)
-ssh_public_key = "" # aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
-                    # ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub; cat suse-demo-aws.pub
-                    # ssh -i suse-demo-aws.pem ec2-user@
+ssh_public_key = "" 
+# **********************************************************************
+# aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
+# ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub; cat suse-demo-aws.pub
+# ssh -i suse-demo-aws.pem ec2-user@
+# aws ec2 describe-key-pairs --region us-east-2  --key-name suse-demo-aws --include-public-key --query "KeyPairs[0].PublicKey" --output text
+# **********************************************************************
 
 # Network access - IMPORTANT: Restrict to your IP for security
 allowed_cidr_blocks = ["0.0.0.0/0"]
