@@ -95,13 +95,13 @@ variable "route53_zone_id" {
   default     = ""
 }
 
-variable "SUSE_EMAIL" {
+variable "suse_email" {
   description = "SUSE Email Address used to register to SCC"
   type        = string
   default     = ""
 }
 
-variable "SUSE_REGCODE" {
+variable "suse_regcode" {
   description = "SUSE Registration Code used to register to SCC"
   type        = string
   default     = ""
