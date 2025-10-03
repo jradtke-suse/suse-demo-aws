@@ -2,7 +2,12 @@
 
 This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.
 
+## Overview
+I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and my permissions allows me to create records. 
+
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
+
+Everything is in a public subnet (NATGW is not needed).
 
 ## Products Included
 
@@ -81,8 +86,9 @@ Each project has its own `terraform.tfvars` file for customization. Review and u
 To destroy all resources, run `terraform destroy` in reverse order:
 
 ```bash
-cd security && terraform destroy
-cd ../observability && terraform destroy
-cd ../rancher-manager && terraform destroy
-cd ../shared-services && terraform destroy
+# you will need to type "yes" and hit (enter) - I intentionally did not make this non-interactive
+cd ./security && terraform destroy && cd -
+cd ./observability && terraform destroy &&  cd -
+cd ./rancher-manager && terraform destroy && cd -
+cd ./shared-services && terraform destroy &&  cd -
 ```
