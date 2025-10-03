@@ -59,6 +59,8 @@ data "aws_route53_zone" "main" {
 locals {
   rancher_fqdn = var.create_route53_record && var.domain_name != "" ? "${var.rancher_subdomain}.${var.domain_name}" : (var.rancher_hostname != "" ? var.rancher_hostname : "rancher.${var.environment}.local")
   zone_id      = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.domain_name != "" ? data.aws_route53_zone.main[0].zone_id : "")
+  scc_suse_email = var.suse_email
+  scc_reg_code = var.suse_reg_code
 }
 
 # Security Group for Rancher
