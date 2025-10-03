@@ -1,11 +1,11 @@
 # Copy this file to terraform.tfvars and customize as needed
 
 # IMPORTANT: Update these values with your SUSE subscription details
-SUSE_EMAIL="your-email@example.com"
-SUSE_REGCODE="YOUR-REGISTRATION-CODE-HERE"
+suse_email="your-email@example.com"
+suse_regcode="YOUR-REGISTRATION-CODE-HERE"
 
 # Optional: Uncomment and set this if using SMT/RMT server instead of SCC
-# SMT_URL="https://your-smt-server.example.com"
+# smt_url="https://your-smt-server.example.com"
 
 # General params
 aws_region  = "us-east-2"
