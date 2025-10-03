@@ -8,7 +8,7 @@ exec 2>&1
 echo "Starting SLES 15 Kubernetes setup..."
 
 #######################################
-# SUSE Registration Configuration
+# SUSE Registration 
 #######################################
 echo "Registering SLES 15 system with SUSE Customer Center..."
 
@@ -33,11 +33,7 @@ zypper refresh
 zypper update -y
 
 # Install required packages
-zypper install -y docker curl git
-
-# Start and enable Docker
-systemctl enable docker
-systemctl start docker
+zypper install -y curl 
 
 # Install kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
