@@ -21,9 +21,9 @@ ssh_public_key = ""
 # **********************************************************************
 # aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
 # ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub; cat suse-demo-aws.pub
-# ssh -i suse-demo-aws.pem ec2-user@
 # aws ec2 describe-key-pairs --region us-east-2  --key-name suse-demo-aws --include-public-key --query "KeyPairs[0].PublicKey" --output text
 # NOTE:  the terraform apply will create suse-demo-aws-rancher-key also
+# ssh -i suse-demo-aws.pem ec2-user@rancher.suse-demo-aws.kubernerdes.com 
 # **********************************************************************
 
 # Network access - IMPORTANT: Restrict to your IP for security
