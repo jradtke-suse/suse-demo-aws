@@ -1,6 +1,31 @@
 #!/bin/bash
 set -e
 
+# Log all output
+exec > >(tee /var/log/user-data.log)
+exec 2>&1
+
+echo "Starting SLES 15 Kubernetes setup..."
+
+#######################################
+# SUSE Registration Configuration
+#######################################
+echo "Registering SLES 15 system with SUSE Customer Center..."
+
+# Register the system with SUSE Customer Center
+if [ -n "$SMT_URL" ]; then
+    # Register with SMT/RMT server
+    SUSEConnect --url "$SMT_URL" --regcode "$SUSE_REGCODE" --email "$SUSE_EMAIL"
+else
+    # Register with SUSE Customer Center (default)
+    SUSEConnect --regcode "$SUSE_REGCODE" --email "$SUSE_EMAIL"
+fi
+
+# Verify registration
+SUSEConnect --status
+
+echo "SLES registration completed successfully"
+
 # Update system
 zypper refresh
 zypper update -y
