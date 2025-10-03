@@ -85,8 +85,8 @@ Each project has its own `terraform.tfvars` file for customization. Review and u
 
 To destroy all resources, run `terraform destroy` in reverse order:
 
+Note: you will need to type "yes" and hit (enter) - I intentionally did not make this non-interactive
 ```bash
-# you will need to type "yes" and hit (enter) - I intentionally did not make this non-interactive
 cd ./security && terraform destroy && cd -
 cd ./observability && terraform destroy &&  cd -
 cd ./rancher-manager && terraform destroy && cd -
