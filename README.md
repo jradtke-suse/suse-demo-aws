@@ -3,7 +3,7 @@
 This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.
 
 ## Overview
-I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and my permissions allows me to create records. 
+I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records. 
 
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 
