@@ -1,13 +1,13 @@
 # Copy this file to terraform.tfvars and customize as needed
 
 aws_region         = "us-east-2"
-environment        = "demo"
+environment        = "suse-demo-aws"
 owner              = "your-name"
 vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
 
 # Set to false to reduce costs (instances in private subnets won't have internet access)
-enable_nat_gateway = true
+enable_nat_gateway = false 
 
 # IMPORTANT: Restrict these to your IP address for better security
 allowed_ssh_cidr_blocks = ["0.0.0.0/0"]
