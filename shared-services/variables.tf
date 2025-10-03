@@ -16,6 +16,12 @@ variable "owner" {
   default     = "suse-demo"
 }
 
+variable "enable_nat_gateway" {
+  description = "Boolean whether to deploy NATGW (future use)"
+  type        = bool  
+  default     = false
+}
+
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
