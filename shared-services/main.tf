@@ -56,18 +56,6 @@ resource "aws_subnet" "public" {
   }
 }
 
-# Private Subnets
-resource "aws_subnet" "private" {
-  count             = length(var.availability_zones)
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 4, count.index + length(var.availability_zones))
-  availability_zone = var.availability_zones[count.index]
-
-  tags = {
-    Name = "${var.environment}-suse-demo-private-${var.availability_zones[count.index]}"
-    Type = "private"
-  }
-}
 
 # Elastic IPs for NAT Gateways
 resource "aws_eip" "nat" {
