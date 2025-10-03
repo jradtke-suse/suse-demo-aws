@@ -106,3 +106,9 @@ variable "suse_regcode" {
   type        = string
   default     = ""
 }
+
+variable "smt_url" {
+  description = "SMT/RMT server URL (leave empty to use SUSE Customer Center)"
+  type        = string
+  default     = ""
+}

@@ -13,14 +13,14 @@ echo "Starting SLES 15 Kubernetes setup..."
 echo "Registering SLES 15 system with SUSE Customer Center..."
 
 # Register the system with SUSE Customer Center
-if [ -n "$SMT_URL" ]; then
+if [ -n "${smt_url}" ]; then
     # Register with SMT/RMT server
-    echo "SUSEConnect --url \"$SMT_URL\" --regcode \"$SUSE_REGCODE\" --email \"$SUSE_EMAIL\" "
-    SUSEConnect --url "$SMT_URL" --regcode "$SUSE_REGCODE" --email "$SUSE_EMAIL"
+    echo "SUSEConnect --url \"${smt_url}\" --regcode \"${suse_regcode}\" --email \"${suse_email}\" "
+    SUSEConnect --url "${smt_url}" --regcode "${suse_regcode}" --email "${suse_email}"
 else
     # Register with SUSE Customer Center (default)
-    echo "SUSEConnect --regcode \"$SUSE_REGCODE\" --email \"$SUSE_EMAIL\" "
-    SUSEConnect --regcode "$SUSE_REGCODE" --email "$SUSE_EMAIL"
+    echo "SUSEConnect --regcode \"${suse_regcode}\" --email \"${suse_email}\" "
+    SUSEConnect --regcode "${suse_regcode}" --email "${suse_email}"
 fi
 
 # Verify registration
