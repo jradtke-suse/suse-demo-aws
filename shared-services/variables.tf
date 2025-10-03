@@ -28,12 +28,6 @@ variable "availability_zones" {
   default     = ["us-east-2a", "us-east-2b", "us-east-2c"]
 }
 
-variable "enable_nat_gateway" {
-  description = "Enable NAT Gateway for private subnets (set to false to reduce costs)"
-  type        = bool
-  default     = true
-}
-
 variable "allowed_ssh_cidr_blocks" {
   description = "CIDR blocks allowed to SSH to instances"
   type        = list(string)

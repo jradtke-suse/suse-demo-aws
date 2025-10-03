@@ -57,30 +57,6 @@ resource "aws_subnet" "public" {
 }
 
 
-# Elastic IPs for NAT Gateways
-resource "aws_eip" "nat" {
-  count  = var.enable_nat_gateway ? length(var.availability_zones) : 0
-  domain = "vpc"
-
-  tags = {
-    Name = "${var.environment}-suse-demo-nat-eip-${var.availability_zones[count.index]}"
-  }
-
-  depends_on = [aws_internet_gateway.main]
-}
-
-# NAT Gateways
-resource "aws_nat_gateway" "main" {
-  count         = var.enable_nat_gateway ? length(var.availability_zones) : 0
-  allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.public[count.index].id
-
-  tags = {
-    Name = "${var.environment}-suse-demo-nat-${var.availability_zones[count.index]}"
-  }
-
-  depends_on = [aws_internet_gateway.main]
-}
 
 # Public Route Table
 resource "aws_route_table" "public" {
@@ -96,36 +72,12 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Private Route Tables
-resource "aws_route_table" "private" {
-  count  = length(var.availability_zones)
-  vpc_id = aws_vpc.main.id
-
-  dynamic "route" {
-    for_each = var.enable_nat_gateway ? [1] : []
-    content {
-      cidr_block     = "0.0.0.0/0"
-      nat_gateway_id = aws_nat_gateway.main[count.index].id
-    }
-  }
-
-  tags = {
-    Name = "${var.environment}-suse-demo-private-rt-${var.availability_zones[count.index]}"
-  }
-}
 
 # Route Table Associations - Public
 resource "aws_route_table_association" "public" {
   count          = length(var.availability_zones)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
-}
-
-# Route Table Associations - Private
-resource "aws_route_table_association" "private" {
-  count          = length(var.availability_zones)
-  subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private[count.index].id
 }
 
 # Security Group - SSH Access
