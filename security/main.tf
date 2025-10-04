@@ -173,6 +173,9 @@ resource "aws_instance" "security" {
 
   user_data = templatefile("${path.module}/user-data.sh", {
     neuvector_version = var.neuvector_version
+    suse_email        = var.suse_email
+    suse_regcode      = var.suse_regcode
+    smt_url           = var.smt_url
   })
 
   tags = {

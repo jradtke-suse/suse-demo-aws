@@ -1,16 +1,39 @@
 #!/bin/bash
 set -e
 
+# Log all output
+exec > >(tee /var/log/user-data.log)
+exec 2>&1
+
+echo "Starting SLES 15 Security setup..."
+
+#######################################
+# SUSE Registration
+#######################################
+echo "Registering SLES 15 system with SUSE Customer Center..."
+
+# Register the system with SUSE Customer Center
+if [ -n "${smt_url}" ]; then
+    # Register with SMT/RMT server
+    echo "SUSEConnect --url \"${smt_url}\" --regcode \"${suse_regcode}\" --email \"${suse_email}\" "
+    SUSEConnect --url "${smt_url}" --regcode "${suse_regcode}" --email "${suse_email}"
+else
+    # Register with SUSE Customer Center (default)
+    echo "SUSEConnect --regcode \"${suse_regcode}\" --email \"${suse_email}\" "
+    SUSEConnect --regcode "${suse_regcode}" --email "${suse_email}"
+fi
+
+# Verify registration
+SUSEConnect --status
+
+echo "SLES registration completed successfully"
+
 # Update system
 zypper refresh
 zypper update -y
 
 # Install required packages
-zypper install -y docker curl git wget
-
-# Start and enable Docker
-systemctl enable docker
-systemctl start docker
+zypper install -y curl wget
 
 # Install kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"

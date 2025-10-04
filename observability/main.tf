@@ -182,6 +182,9 @@ resource "aws_instance" "observability" {
 
   user_data = templatefile("${path.module}/user-data.sh", {
     grafana_admin_password = var.grafana_admin_password
+    suse_email             = var.suse_email
+    suse_regcode           = var.suse_regcode
+    smt_url                = var.smt_url
   })
 
   tags = {

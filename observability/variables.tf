@@ -58,3 +58,21 @@ variable "grafana_admin_password" {
   default     = "admin"
   sensitive   = true
 }
+
+variable "suse_email" {
+  description = "SUSE Email Address used to register to SCC"
+  type        = string
+  default     = ""
+}
+
+variable "suse_regcode" {
+  description = "SUSE Registration Code used to register to SCC"
+  type        = string
+  default     = ""
+}
+
+variable "smt_url" {
+  description = "SMT/RMT server URL (leave empty to use SUSE Customer Center)"
+  type        = string
+  default     = ""
+}
