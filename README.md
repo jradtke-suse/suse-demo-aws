@@ -2,12 +2,15 @@
 
 This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.
 
-## Overview
-I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records. 
+
+## Notes and Caveats 
+
+* I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain. 
+* Everything is in a public subnet (NATGW is not needed).
+* While there is a separate directory for each SUSE product, they all rely on the tftstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
 
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 
-Everything is in a public subnet (NATGW is not needed).
 
 ## Products Included
 
