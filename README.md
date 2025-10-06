@@ -2,6 +2,8 @@
 
 This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.
 
+## Status
+This is very much a work-in-progress at this time (2025-10-06).  I hope to have the Rancher Manager portion finished up soon (Mid-Oct) and then O11y, then Security.
 
 ## Notes and Caveats 
 
