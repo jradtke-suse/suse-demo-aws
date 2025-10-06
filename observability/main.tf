@@ -48,52 +48,44 @@ data "aws_ami" "sles" {
   }
 }
 
-# Security Group for Observability
+# Security Group for SUSE Observability
 resource "aws_security_group" "observability" {
   name_prefix = "${var.environment}-observability-"
-  description = "Security group for SUSE Observability"
+  description = "Security group for SUSE Observability (StackState)"
   vpc_id      = data.terraform_remote_state.shared.outputs.vpc_id
 
-  # Observability UI
+  # SUSE Observability UI (HTTPS)
   ingress {
-    description = "Observability UI"
+    description = "SUSE Observability UI"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = var.allowed_cidr_blocks
   }
 
+  # SUSE Observability UI (HTTP)
   ingress {
-    description = "Observability UI HTTP"
+    description = "SUSE Observability UI HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = var.allowed_cidr_blocks
   }
 
-  # Prometheus
+  # SUSE Observability Router (default port)
   ingress {
-    description = "Prometheus"
-    from_port   = 9090
-    to_port     = 9090
+    description = "SUSE Observability Router"
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = var.allowed_cidr_blocks
   }
 
-  # Grafana
+  # K3s API Server
   ingress {
-    description = "Grafana"
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = var.allowed_cidr_blocks
-  }
-
-  # AlertManager
-  ingress {
-    description = "AlertManager"
-    from_port   = 9093
-    to_port     = 9093
+    description = "K3s API Server"
+    from_port   = 6443
+    to_port     = 6443
     protocol    = "tcp"
     cidr_blocks = var.allowed_cidr_blocks
   }
@@ -107,7 +99,7 @@ resource "aws_security_group" "observability" {
   }
 
   tags = {
-    Name = "${var.environment}-observability-sg"
+    Name = "${var.environment}-suse-observability-sg"
   }
 
   lifecycle {
@@ -181,10 +173,12 @@ resource "aws_instance" "observability" {
   }
 
   user_data = templatefile("${path.module}/user-data.sh", {
-    grafana_admin_password = var.grafana_admin_password
-    suse_email             = var.suse_email
-    suse_regcode           = var.suse_regcode
-    smt_url                = var.smt_url
+    suse_observability_license        = var.suse_observability_license
+    suse_observability_base_url       = var.suse_observability_base_url
+    suse_observability_admin_password = var.suse_observability_admin_password
+    suse_email                        = var.suse_email
+    suse_regcode                      = var.suse_regcode
+    smt_url                           = var.smt_url
   })
 
   tags = {

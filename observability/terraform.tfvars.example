@@ -1,21 +1,73 @@
-# Copy this file to terraform.tfvars and customize as needed
-
+# AWS Configuration
 aws_region  = "us-east-2"
 environment = "demo"
 owner       = "your-name"
 
-# Instance configuration
-instance_type    = "t3.large" # Sufficient for demo observability stack
-root_volume_size = 100
+# EC2 Instance Configuration
+# Minimum t3.xlarge for 10-nonha profile (4 vCPU, 16GB RAM)
+instance_type = "t3.xlarge"
 
-# SSH access (paste your public SSH key)
-ssh_public_key = ""
+# Minimum 280GB required for 10-nonha profile
+root_volume_size = 300
 
-# Network access - IMPORTANT: Restrict to your IP for security
+# SSH Access
+# Generate key: ssh-keygen -t rsa -b 4096 -f ~/.ssh/suse-observability
+# Then paste the public key here
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2E..."
+
+# Network Access Control
+# Restrict to your IP for security: ["YOUR.IP.ADDRESS/32"]
 allowed_cidr_blocks = ["0.0.0.0/0"]
 
-# Create Elastic IP for stable public IP
+# Elastic IP
+# Set to true for stable public IP address
 create_eip = true
 
-# Grafana admin password - CHANGE THIS!
-grafana_admin_password = "admin"
+# SUSE Observability Configuration (REQUIRED)
+# License key from SUSE - REQUIRED
+suse_observability_license = "YOUR_SUSE_OBSERVABILITY_LICENSE_KEY"
+
+# Base URL for SUSE Observability
+# This should be the URL where you'll access the UI
+# Examples:
+#   - "https://observability.suse-demo-aws.kubernerdes.com"
+#   - "http://observability.example.com"
+suse_observability_base_url = "https://observability.suse-demo-aws.kubernerdes.com"
+
+# Admin password for SUSE Observability (optional)
+# Leave empty to auto-generate a password
+# Auto-generated password will be available in /root/suse-observability-credentials.txt on the instance
+suse_observability_admin_password = ""
+
+# SUSE Customer Center Registration (REQUIRED for SLES)
+# Email address registered with SUSE
+suse_email = "your-email@example.com"
+
+# SUSE registration code for SLES
+suse_regcode = "YOUR_SLES_REGISTRATION_CODE"
+
+# SMT/RMT Server (optional)
+# Leave empty to use SUSE Customer Center directly
+smt_url = ""
+
+# Deployment Information
+# ----------------------
+# Sizing Profile: 10-nonha (non-HA, suitable for up to 10 Kubernetes nodes)
+# Resource Requirements:
+#   - CPU: 7.5 requests / 16 limits
+#   - Memory: 25.5Gi requests / 26Gi limits
+#   - Storage: 280GB (with 30 days retention)
+# Kubernetes: K3s (lightweight Kubernetes distribution)
+# Namespace: suse-observability
+#
+# Access Information (after deployment):
+#   - SUSE Observability UI: http://<public-ip>:8080
+#   - Username: admin
+#   - Password: See /root/suse-observability-credentials.txt on instance
+#   - SSH: ssh ec2-user@<public-ip>
+#   - KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+#
+# Useful Commands:
+#   - Check deployment: terraform output kubectl_commands
+#   - View credentials: ssh ec2-user@<ip> "sudo cat /root/suse-observability-credentials.txt"
+#   - Check pods: ssh ec2-user@<ip> "sudo kubectl get pods -n suse-observability"

@@ -17,9 +17,9 @@ variable "owner" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type for Observability server"
+  description = "EC2 instance type for Observability server (minimum t3.xlarge for 10-nonha profile)"
   type        = string
-  default     = "t3.large"
+  default     = "t3.xlarge"
 }
 
 variable "ami_id" {
@@ -29,9 +29,9 @@ variable "ami_id" {
 }
 
 variable "root_volume_size" {
-  description = "Size of root volume in GB"
+  description = "Size of root volume in GB (minimum 280GB for 10-nonha profile)"
   type        = number
-  default     = 100
+  default     = 300
 }
 
 variable "ssh_public_key" {
@@ -52,10 +52,21 @@ variable "create_eip" {
   default     = true
 }
 
-variable "grafana_admin_password" {
-  description = "Admin password for Grafana"
+variable "suse_observability_license" {
+  description = "SUSE Observability license key (required)"
   type        = string
-  default     = "admin"
+  sensitive   = true
+}
+
+variable "suse_observability_base_url" {
+  description = "Base URL for SUSE Observability (e.g., https://observability.example.com)"
+  type        = string
+}
+
+variable "suse_observability_admin_password" {
+  description = "Admin password for SUSE Observability (auto-generated if empty)"
+  type        = string
+  default     = ""
   sensitive   = true
 }
 

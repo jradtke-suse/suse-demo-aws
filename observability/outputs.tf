@@ -1,39 +1,72 @@
 output "instance_id" {
-  description = "ID of the Observability EC2 instance"
+  description = "ID of the SUSE Observability EC2 instance"
   value       = aws_instance.observability.id
 }
 
 output "private_ip" {
-  description = "Private IP address of Observability instance"
+  description = "Private IP address of SUSE Observability instance"
   value       = aws_instance.observability.private_ip
 }
 
 output "public_ip" {
-  description = "Public IP address of Observability instance"
+  description = "Public IP address of SUSE Observability instance"
   value       = var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip
 }
 
-output "grafana_url" {
-  description = "URL to access Grafana"
-  value       = "http://${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}:3000"
+output "suse_observability_url" {
+  description = "URL to access SUSE Observability UI"
+  value       = "http://${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}:8080"
 }
 
-output "prometheus_url" {
-  description = "URL to access Prometheus"
-  value       = "http://${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}:9090"
+output "suse_observability_base_url" {
+  description = "Configured base URL for SUSE Observability"
+  value       = var.suse_observability_base_url
 }
 
-output "alertmanager_url" {
-  description = "URL to access AlertManager"
-  value       = "http://${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}:9093"
+output "k3s_kubeconfig_path" {
+  description = "Path to K3s kubeconfig file on the instance"
+  value       = "/etc/rancher/k3s/k3s.yaml"
+}
+
+output "credentials_file_path" {
+  description = "Path to SUSE Observability credentials file on the instance"
+  value       = "/root/suse-observability-credentials.txt"
 }
 
 output "security_group_id" {
-  description = "ID of Observability security group"
+  description = "ID of SUSE Observability security group"
   value       = aws_security_group.observability.id
 }
 
 output "ssh_command" {
   description = "SSH command to connect to instance"
   value       = var.ssh_public_key != "" ? "ssh ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}" : "Use AWS Systems Manager Session Manager to connect"
+}
+
+output "kubectl_commands" {
+  description = "Useful kubectl commands for managing SUSE Observability"
+  value = <<-EOT
+    # Get pods status
+    ssh ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip} "sudo kubectl get pods -n suse-observability"
+
+    # Get services
+    ssh ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip} "sudo kubectl get svc -n suse-observability"
+
+    # View logs
+    ssh ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip} "sudo kubectl logs -n suse-observability -l app=suse-observability-router --tail=100"
+
+    # Get credentials
+    ssh ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip} "sudo cat /root/suse-observability-credentials.txt"
+  EOT
+}
+
+output "deployment_info" {
+  description = "SUSE Observability deployment information"
+  value = {
+    sizing_profile = "10-nonha"
+    instance_type  = var.instance_type
+    storage_size   = "${var.root_volume_size}GB"
+    kubernetes     = "K3s (lightweight)"
+    namespace      = "suse-observability"
+  }
 }
