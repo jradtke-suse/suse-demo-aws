@@ -35,7 +35,7 @@ create_eip = true
 
 # Rancher configuration
 rancher_version      = "2.12.2"
-cert_manager_version = "1.15.3"
+cert_manager_version = "1.18.2"
 rancher_hostname     = "rancher" # Leave empty to use IP-based hostname
 
 # Route53 DNS Configuration (optional)
