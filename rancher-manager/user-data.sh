@@ -56,6 +56,9 @@ mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
 
+# Adding a pause
+sleep 30 
+
 # Install cert-manager
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v${cert_manager_version}/cert-manager.crds.yaml
 
@@ -73,12 +76,12 @@ helm install cert-manager jetstack/cert-manager \
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
 
 # Install Rancher
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 helm repo update
 
 kubectl create namespace cattle-system || true
 
-helm install rancher rancher-latest/rancher \
+helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
   --set hostname=${hostname} \
   --set replicas=1 \
@@ -87,7 +90,7 @@ helm install rancher rancher-latest/rancher \
   --wait
 
 # Wait for Rancher to be ready
-kubectl -n cattle-system rollout status deploy/rancher
+until kubectl -n cattle-system wait --for=condition=available --timeout=30s deployment/rancher; do sleep 5; done
 
 echo "Rancher installation complete!"
 echo "Access Rancher at: https://${hostname}"
