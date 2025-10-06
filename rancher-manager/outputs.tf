@@ -13,11 +13,6 @@ output "public_ip" {
   value       = var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip
 }
 
-output "rancher_url" {
-  description = "URL to access Rancher"
-  value       = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "https://${var.hostname}.${var.subdomain}.${var.root_domain}" : "https://${var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip}"
-}
-
 output "rancher_hostname" {
   description = "Hostname used for Rancher installation"
   value       = local.rancher_fqdn
@@ -36,4 +31,9 @@ output "security_group_id" {
 output "ssh_command" {
   description = "SSH command to connect to instance"
   value       = var.ssh_public_key != "" ? "ssh -i suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip}" : "Use AWS Systems Manager Session Manager to connect"
+}
+
+output "rancher_url" {
+  description = "URL to access Rancher (may take up to 5 minutes to start"
+  value       = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "https://${var.hostname}.${var.subdomain}.${var.root_domain}" : "https://${var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip}"
 }

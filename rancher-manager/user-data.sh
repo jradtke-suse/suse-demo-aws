@@ -59,6 +59,7 @@ mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
 export KUBECONFIG=/root/.kube/config
+echo "export KUBECONFIG=/root/.kube/config" >> /root/.bashrc
 
 # Wait for K3s API server to be responsive
 echo "Waiting for K3s API server to be ready..."
