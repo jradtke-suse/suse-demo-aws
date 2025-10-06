@@ -44,7 +44,7 @@ resource "aws_internet_gateway" "main" {
 
 # Public Subnets
 resource "aws_subnet" "public" {
-  count                   = length(var.availability_zones)
+  count                   = var.az_count
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 4, count.index)
   availability_zone       = var.availability_zones[count.index]
@@ -75,7 +75,7 @@ resource "aws_route_table" "public" {
 
 # Route Table Associations - Public
 resource "aws_route_table_association" "public" {
-  count          = length(var.availability_zones)
+  count          = var.az_count
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }

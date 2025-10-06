@@ -5,6 +5,7 @@ environment        = "suse-demo-aws"
 owner              = "your-name"
 vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
+az_count          = 3
 
 # Set to false to reduce costs (instances in private subnets won't have internet access)
 enable_nat_gateway = false 

@@ -45,5 +45,5 @@ output "internal_security_group_id" {
 
 output "availability_zones" {
   description = "Availability zones used"
-  value       = var.availability_zones
+  value       = slice(var.availability_zones, 0, var.az_count)
 }
