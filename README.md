@@ -5,6 +5,13 @@ This repository contains Terraform projects to deploy a complete SUSE product de
 ## Status
 This is very much a work-in-progress at this time (2025-10-06).  I hope to have the Rancher Manager portion finished up soon (Mid-Oct) and then O11y, then Security.
 
+| Project | Status |
+|:--------|:------:|
+| Shared Services | Done | 
+| **SUSE Rancher Manager** | Done |
+| **SUSE Observability** | Work in Progress |
+| **SUSE Security** | Not Started |
+
 ## Notes and Caveats 
 
 * I have intentionally left some of my own (opinionated) values in some of the variables - specifically my own domain_name.  I feel it makes it easier to understand how the variable values are used.  You MUST, however, update with your own values.
