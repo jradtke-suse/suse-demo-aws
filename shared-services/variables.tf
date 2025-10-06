@@ -37,11 +37,6 @@ variable "az_count" {
     condition     = var.az_count >= 1 && var.az_count <= 6
     error_message = "The az_count must be between 1 and 6."
   }
-
-  validation {
-    condition     = var.az_count <= length(var.availability_zones)
-    error_message = "The az_count cannot exceed the number of availability zones specified in the availability_zones variable."
-  }
 }
 
 variable "availability_zones" {
