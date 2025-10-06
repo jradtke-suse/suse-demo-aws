@@ -20,8 +20,9 @@ root_volume_size  = 100
 ssh_public_key = "" 
 # **********************************************************************
 # aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
-# ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub; cat suse-demo-aws.pub
-# aws ec2 describe-key-pairs --region us-east-2  --key-name suse-demo-aws --include-public-key --query "KeyPairs[0].PublicKey" --output text
+# Use one of the following to gather your pub.key
+#  ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub; cat suse-demo-aws.pub
+#  aws ec2 describe-key-pairs --region us-east-2  --key-name suse-demo-aws --include-public-key --query "KeyPairs[0].PublicKey" --output text
 # NOTE:  the terraform apply will create suse-demo-aws-rancher-key also
 # ssh -i suse-demo-aws.pem ec2-user@rancher.suse-demo-aws.kubernerdes.com 
 # **********************************************************************
@@ -33,7 +34,7 @@ allowed_cidr_blocks = ["0.0.0.0/0"]
 create_eip = true
 
 # Rancher configuration
-rancher_version      = "2.9.2"
+rancher_version      = "2.12.2"
 cert_manager_version = "1.15.3"
 rancher_hostname     = "rancher" # Leave empty to use IP-based hostname
 
