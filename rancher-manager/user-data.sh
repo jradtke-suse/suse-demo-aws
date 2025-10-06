@@ -6,6 +6,8 @@ exec > >(tee /var/log/user-data.log)
 exec 2>&1
 
 echo "Starting SLES 15 Kubernetes setup..."
+echo "Running as: $(whoami)"
+echo "Started at: $(date)"
 
 #######################################
 # SUSE Registration 

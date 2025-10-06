@@ -64,7 +64,6 @@ variable "cert_manager_version" {
   default     = "1.15.3"
 }
 
-
 # Route53 DNS Configuration
 variable "create_route53_record" {
   description = "Create Route53 DNS record for Rancher"
