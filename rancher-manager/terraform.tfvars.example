@@ -36,13 +36,14 @@ create_eip = true
 # Rancher configuration
 rancher_version      = "2.12.2"
 cert_manager_version = "1.15.3"
-rancher_hostname     = "rancher" # Leave empty to use IP-based hostname
 
 # Route53 DNS Configuration (optional)
 # Set create_route53_record = true to create a DNS record
-create_route53_record = true 
-domain_name          = "suse-demo-aws.kubernerdes.com"           # e.g., "example.com"
-rancher_subdomain    = "rancher"    # Will create rancher.example.com
-route53_zone_id      = ""           # Leave empty to auto-discover by domain_name
-                                    # aws route53 list-hosted-zones-by-name --dns-name suse-demo-aws.kubernerdes.com --query "HostedZones[].Id" --output text 
+# This creates: hostname.subdomain.root_domain (e.g., rancher.suse-demo-aws.kubernerdes.com)
+create_route53_record = true
+root_domain          = "kubernerdes.com"         # Your root domain
+subdomain            = "suse-demo-aws"           # Environment subdomain
+hostname             = "rancher"                 # Service hostname
+route53_zone_id      = ""                        # Leave empty to auto-discover
+                                                 # aws route53 list-hosted-zones-by-name --dns-name suse-demo-aws.kubernerdes.com --query "HostedZones[].Id" --output text 
 

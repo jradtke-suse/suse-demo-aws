@@ -64,11 +64,6 @@ variable "cert_manager_version" {
   default     = "1.15.3"
 }
 
-variable "rancher_hostname" {
-  description = "Hostname for Rancher (leave empty to use default)"
-  type        = string
-  default     = ""
-}
 
 # Route53 DNS Configuration
 variable "create_route53_record" {
@@ -77,20 +72,26 @@ variable "create_route53_record" {
   default     = false
 }
 
-variable "domain_name" {
-  description = "Domain name for Route53 (e.g., example.com)"
+variable "root_domain" {
+  description = "Root domain name (e.g., kubernerdes.com)"
   type        = string
   default     = ""
 }
 
-variable "rancher_subdomain" {
-  description = "Subdomain for Rancher (e.g., rancher)"
+variable "subdomain" {
+  description = "Environment subdomain (e.g., suse-demo-aws)"
+  type        = string
+  default     = ""
+}
+
+variable "hostname" {
+  description = "Hostname for Rancher service (e.g., rancher). Creates hostname.subdomain.root_domain"
   type        = string
   default     = "rancher"
 }
 
 variable "route53_zone_id" {
-  description = "Route53 Hosted Zone ID (leave empty to auto-discover by domain name)"
+  description = "Route53 Hosted Zone ID (leave empty to auto-discover from subdomain.root_domain)"
   type        = string
   default     = ""
 }

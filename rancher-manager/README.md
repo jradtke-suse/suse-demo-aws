@@ -40,21 +40,23 @@ Rancher is deployed on a single EC2 instance running:
 
 To use a custom domain name instead of an IP address:
 
-1. Ensure you have a Route53 hosted zone for your domain
+1. Ensure you have a Route53 hosted zone for your subdomain (e.g., `suse-demo-aws.kubernerdes.com`)
 2. In `terraform.tfvars`, set:
    ```hcl
    create_route53_record = true
-   domain_name          = "example.com"
-   rancher_subdomain    = "rancher"  # Creates rancher.example.com
+   root_domain          = "kubernerdes.com"      # Your root domain
+   subdomain            = "suse-demo-aws"        # Environment subdomain
+   hostname             = "rancher"              # Service hostname
+   # This creates: rancher.suse-demo-aws.kubernerdes.com
    ```
 3. (Optional) If you know your Route53 zone ID:
    ```hcl
    route53_zone_id = "Z1234567890ABC"
    ```
-   Otherwise, it will be auto-discovered from `domain_name`
+   Otherwise, it will be auto-discovered from `subdomain.root_domain`
 
 **Benefits of using Route53:**
-- Stable DNS name (e.g., `rancher.example.com`)
+- Stable DNS name (e.g., `rancher.suse-demo-aws.kubernerdes.com`)
 - SSL certificates work properly with cert-manager
 - Easier to remember and share access
 
@@ -112,6 +114,6 @@ If Rancher is not accessible:
 5. If using Route53, verify DNS record was created:
    ```bash
    terraform output route53_record
-   nslookup rancher.example.com
+   nslookup rancher.suse-demo-aws.kubernerdes.com
    ```
 6. If DNS is configured but SSL fails, wait for cert-manager to issue certificates (~2-5 minutes)

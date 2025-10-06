@@ -50,15 +50,16 @@ data "aws_ami" "sles" {
 
 # Route53 Zone lookup (if zone_id not provided)
 data "aws_route53_zone" "main" {
-  count        = var.create_route53_record && var.route53_zone_id == "" && var.domain_name != "" ? 1 : 0
-  name         = var.domain_name
+  count        = var.create_route53_record && var.route53_zone_id == "" && var.subdomain != "" && var.root_domain != "" ? 1 : 0
+  name         = "${var.subdomain}.${var.root_domain}"
   private_zone = false
 }
 
 # Local variable for hostname
 locals {
-  rancher_fqdn = var.create_route53_record && var.domain_name != "" ? "${var.rancher_subdomain}.${var.domain_name}" : (var.rancher_hostname != "" ? var.rancher_hostname : "rancher.${var.environment}.local")
-  zone_id      = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.domain_name != "" ? data.aws_route53_zone.main[0].zone_id : "")
+  # Build FQDN: hostname.subdomain.root_domain (e.g., rancher.suse-demo-aws.kubernerdes.com)
+  rancher_fqdn = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname}.${var.subdomain}.${var.root_domain}" : "rancher.${var.environment}.local"
+  zone_id      = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? data.aws_route53_zone.main[0].zone_id : "")
   scc_suse_email = var.suse_email
   scc_regcode = var.suse_regcode
 }
@@ -204,9 +205,9 @@ resource "aws_eip" "rancher" {
 
 # Route53 A Record for Rancher
 resource "aws_route53_record" "rancher" {
-  count   = var.create_route53_record && var.domain_name != "" ? 1 : 0
+  count   = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? 1 : 0
   zone_id = local.zone_id
-  name    = "${var.rancher_subdomain}.${var.domain_name}"
+  name    = "${var.hostname}.${var.subdomain}.${var.root_domain}"
   type    = "A"
   ttl     = 300
   records = [var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip]
