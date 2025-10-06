@@ -10,7 +10,7 @@ suse_regcode="YOUR-REGISTRATION-CODE-HERE"
 # General params
 aws_region  = "us-east-2"
 environment = "suse-demo-aws"
-owner       = "jradtke-suse"
+owner       = "your-name"
 
 # Instance configuration
 instance_type     = "t3.xlarge" # Minimum recommended for Rancher
