@@ -38,144 +38,147 @@ zypper update -y
 echo "Installing required packages..."
 zypper install -y curl wget git-core apparmor-parser
 
-#######################################
-# Install K3s (Lightweight Kubernetes)
-#######################################
-echo "Installing K3s..."
+# Install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-# Install K3s with specific options for single-node deployment
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
-  --disable traefik \
-  --write-kubeconfig-mode 644" sh -
-
-# Wait for K3s to be ready
-echo "Waiting for K3s to be ready..."
-sleep 30
-
-# Verify K3s installation
-k3s kubectl get nodes
-
-# Set up kubectl for root user
-mkdir -p ~/.kube
-ln -sf /etc/rancher/k3s/k3s.yaml ~/.kube/config
-export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-
-#######################################
 # Install Helm
-#######################################
-echo "Installing Helm..."
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Verify Helm installation
 helm version
 
 #######################################
+# Install K3s (Lightweight Kubernetes)
+#######################################
+echo "Installing K3s..."
+
+# Install K3s with specific options for single-node deployment
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \ 
+  --cluster-init \
+  --disable traefik \
+  --write-kubeconfig-mode 644" sh -
+
+# Wait for K3s service to be active
+echo "Waiting for K3s service to be active..."
+until systemctl is-active --quiet k3s; do
+  echo "K3s service not yet active..."
+  sleep 5
+done
+
+# Set up kubeconfig
+mkdir -p /root/.kube
+cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
+chmod 600 /root/.kube/config
+export KUBECONFIG=/root/.kube/config
+echo "export KUBECONFIG=/root/.kube/config" >> /root/.bashrc
+
+# Verify K3s installation
+# Wait for K3s API server to be responsive
+echo "Waiting for K3s API server to be ready..."
+until kubectl get nodes > /dev/null 2>&1; do
+  echo "K3s API server not yet responsive..."
+  sleep 5
+done
+
+# Wait for K3s API server to be responsive
+echo "Waiting for K3s API server to be ready..."
+until kubectl get nodes > /dev/null 2>&1; do
+  echo "K3s API server not yet responsive..."
+  sleep 5
+done
+
+# Wait for nodes to be Ready
+echo "Waiting for K3s node to be Ready..."
+until kubectl wait --for=condition=Ready nodes --all --timeout=10s > /dev/null 2>&1; do
+  echo "K3s node not yet ready..."
+  sleep 5
+done
+
+# Wait for core K3s components to be running
+echo "Waiting for core K3s components..."
+until kubectl get deployment -n kube-system coredns > /dev/null 2>&1; do
+  echo "CoreDNS not yet deployed..."
+  sleep 5
+done
+
+kubectl wait --for=condition=available --timeout=300s deployment/coredns -n kube-system
+
+echo "K3s is fully ready!"
+
+# Install cert-manager
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v${cert_manager_version}/cert-manager.crds.yaml
+
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+kubectl create namespace cert-manager || true
+
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --version v${cert_manager_version} \
+  --wait
+
+# Wait for cert-manager to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
+
+#######################################
 # Install SUSE Observability
 #######################################
 echo "Installing SUSE Observability (StackState)..."
 
-# Add SUSE Observability Helm repository
+mkdir -p ~/Developer/Projects/observability.suse-demo-aws.kubernerdes.lab; cd $_
+
+# Add the SUSE Observability Helm Repo
 helm repo add suse-observability https://charts.rancher.com/server-charts/prime/suse-observability
 helm repo update
 
-# Create namespace for SUSE Observability
-kubectl create namespace suse-observability
-
-# Generate SUSE Observability configuration files
-export VALUES_DIR=/opt/suse-observability
-mkdir -p $VALUES_DIR
-
-echo "Generating SUSE Observability configuration..."
+# Create template files
+export VALUES_DIR=.
 helm template \
   --set license='${suse_observability_license}' \
+  --set rancherUrl='${suse_rancher_url}' \
   --set baseUrl='${suse_observability_base_url}' \
   --set sizing.profile='10-nonha' \
   suse-observability-values \
   suse-observability/suse-observability-values --output-dir $VALUES_DIR
 
-# Configure storage class for K3s (uses local-path provisioner)
-cat > $VALUES_DIR/storage-override.yaml <<EOF
-global:
-  storageClass: "local-path"
+# Install using temmplate files created in previous step
+helm upgrade --install \
+    --namespace suse-observability \
+    --create-namespace \
+    --values $VALUES_DIR/suse-observability-values/templates/baseConfig_values.yaml \
+    --values $VALUES_DIR/suse-observability-values/templates/sizing_values.yaml \
+    --values $VALUES_DIR/suse-observability-values/templates/affinity_values.yaml \
+    suse-observability \
+    suse-observability/suse-observability
+
+kubectl get all -n suse-observability
+
+# temp port forward
+kubectl port-forward service/suse-observability-router 8080:8080 --namespace suse-observability
+
+# Expose App
+cat << EOF | tee suse-observability-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: suse-observability-ingress
+  namespace: suse-observability
+spec:
+  rules:
+    - host: ${hostname}.${subdomain}.${root_domain} 
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: suse-observability-router
+                port:
+                  number: 8080
 EOF
-
-# Set admin password if provided
-if [ -n "${suse_observability_admin_password}" ]; then
-  cat > $VALUES_DIR/auth-override.yaml <<EOF
-stackstate:
-  components:
-    api:
-      auth:
-        adminPassword: "${suse_observability_admin_password}"
-EOF
-  EXTRA_VALUES="--values $VALUES_DIR/auth-override.yaml"
-else
-  EXTRA_VALUES=""
-fi
-
-# Install SUSE Observability with Helm
-echo "Deploying SUSE Observability..."
-helm upgrade \
-  --install \
-  --namespace suse-observability \
-  --values $VALUES_DIR/suse-observability-values/templates/baseConfig_values.yaml \
-  --values $VALUES_DIR/suse-observability-values/templates/sizing_values.yaml \
-  --values $VALUES_DIR/suse-observability-values/templates/affinity_values.yaml \
-  --values $VALUES_DIR/storage-override.yaml \
-  $EXTRA_VALUES \
-  --timeout 30m \
-  --wait \
-  suse-observability \
-  suse-observability/suse-observability
-
-#######################################
-# Configure Access
-#######################################
-echo "Configuring SUSE Observability access..."
-
-# Get the admin password
-ADMIN_PASSWORD=$(kubectl get secret \
-  --namespace suse-observability \
-  suse-observability-admin-credentials \
-  -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo "Password not yet generated")
-
-# Save credentials to file
-cat > /root/suse-observability-credentials.txt <<EOF
-SUSE Observability Credentials
-==============================
-URL: ${suse_observability_base_url}
-Username: admin
-Password: $ADMIN_PASSWORD
-
-To access the UI via port-forward:
-kubectl port-forward --address 0.0.0.0 service/suse-observability-suse-observability-router 8080:8080 --namespace suse-observability
-
-Then access: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8080
-EOF
-
-# Create systemd service for port-forwarding (optional, for external access without ingress)
-cat > /etc/systemd/system/suse-observability-port-forward.service <<EOF
-[Unit]
-Description=SUSE Observability Port Forward
-After=k3s.service
-Requires=k3s.service
-
-[Service]
-Type=simple
-Restart=always
-RestartSec=10
-ExecStart=/usr/local/bin/k3s kubectl port-forward --address 0.0.0.0 service/suse-observability-suse-observability-router 8080:8080 --namespace suse-observability
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Enable and start port-forward service
-systemctl daemon-reload
-systemctl enable suse-observability-port-forward.service
-systemctl start suse-observability-port-forward.service
+kubectl apply -f suse-observability-ingress.yaml
 
 #######################################
 # Final Status
