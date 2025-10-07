@@ -1,0 +1,120 @@
+# =============================================================================
+# SUSE Demo AWS - Unified Configuration File
+# =============================================================================
+# This single terraform.tfvars file contains configuration for all modules:
+#   - shared-services/
+#   - rancher-manager/
+#   - observability/
+#   - security/
+#
+# Usage: Each module should reference this file via:
+#   terraform apply -var-file=../terraform.tfvars
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Global Configuration
+# -----------------------------------------------------------------------------
+aws_region  = "us-east-2"
+environment = "suse-demo-aws"
+owner       = "your-name"
+
+# -----------------------------------------------------------------------------
+# Network Configuration (shared-services module)
+# -----------------------------------------------------------------------------
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-east-2a"]
+az_count           = 1
+enable_nat_gateway = false
+
+# -----------------------------------------------------------------------------
+# Security Configuration (all modules)
+# -----------------------------------------------------------------------------
+# IMPORTANT: Restrict these to your IP address for better security
+allowed_ssh_cidr_blocks = ["0.0.0.0/0"]
+allowed_web_cidr_blocks = ["0.0.0.0/0"]
+allowed_cidr_blocks     = ["0.0.0.0/0"]
+
+# -----------------------------------------------------------------------------
+# SSH Configuration (all product modules)
+# -----------------------------------------------------------------------------
+# Paste your SSH public key here
+ssh_public_key = ""
+
+# **********************************************************************
+# aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
+#  aws ec2 describe-key-pairs --region us-east-2  --key-name suse-demo-aws --include-public-key --query "KeyPairs[0].PublicKey" --output text
+# You can also use the following to gather your pub.key
+#  ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub; cat suse-demo-aws.pub
+# NOTE:  the terraform apply will create suse-demo-aws-rancher-key also
+# ssh -i suse-demo-aws.pem ec2-user@rancher.suse-demo-aws.kubernerdes.com
+# **********************************************************************
+
+# Commands to create/retrieve SSH key:
+# aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem
+# chmod 0600 suse-demo-aws.pem
+# ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub
+# cat suse-demo-aws.pub
+
+# -----------------------------------------------------------------------------
+# EC2 Instance Configuration (per module)
+# -----------------------------------------------------------------------------
+# Rancher Manager
+rancher_instance_type      = "t3.xlarge"
+rancher_root_volume_size   = 100
+
+# SUSE Observability
+observability_instance_type     = "t3.xlarge"  # Minimum for 10-nonha profile
+observability_root_volume_size  = 300          # Minimum 280GB for 10-nonha profile
+
+# Security/NeuVector
+security_instance_type      = "t3.large"
+security_root_volume_size   = 100
+
+# -----------------------------------------------------------------------------
+# Elastic IP Configuration (all product modules)
+# -----------------------------------------------------------------------------
+create_eip = true
+
+# -----------------------------------------------------------------------------
+# DNS Configuration (Route53 - optional)
+# -----------------------------------------------------------------------------
+create_route53_record = false
+root_domain           = "kubernerdes.com"
+subdomain             = "suse-demo-aws"
+route53_zone_id       = ""  # Leave empty to auto-discover
+
+# To find your Route53 zone ID:
+# aws route53 list-hosted-zones-by-name --dns-name suse-demo-aws.kubernerdes.com --query "HostedZones[].Id" --output text
+
+# -----------------------------------------------------------------------------
+# SUSE Registration (all modules)
+# -----------------------------------------------------------------------------
+# IMPORTANT: Update these with your SUSE subscription details
+suse_email   = "your-email@example.com"
+suse_regcode = "YOUR-REGISTRATION-CODE-HERE"
+smt_url      = ""  # Optional: SMT/RMT server URL (leave empty to use SCC)
+
+# -----------------------------------------------------------------------------
+# Rancher Manager Configuration
+# -----------------------------------------------------------------------------
+rancher_version      = "2.12.2"
+cert_manager_version = "1.15.3"
+
+# -----------------------------------------------------------------------------
+# SUSE Observability Configuration
+# -----------------------------------------------------------------------------
+suse_observability_license = "YOUR_SUSE_OBSERVABILITY_LICENSE_KEY"
+suse_observability_base_url = "https://observability.suse-demo-aws.kubernerdes.com"
+suse_rancher_url = "https://rancher.suse-demo-aws.kubernerdes.com"
+suse_observability_admin_password = ""  # Leave empty to auto-generate
+
+# -----------------------------------------------------------------------------
+# Security/NeuVector Configuration
+# -----------------------------------------------------------------------------
+neuvector_version = "5.3.4"
+
+# -----------------------------------------------------------------------------
+# Optional: AMI Override (all modules)
+# -----------------------------------------------------------------------------
+# Leave empty to use latest SUSE Linux Enterprise Server AMI
+ami_id = ""
