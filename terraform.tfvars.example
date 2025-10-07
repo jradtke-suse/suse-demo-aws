@@ -52,15 +52,15 @@ ssh_public_key = ""
 # -----------------------------------------------------------------------------
 # EC2 Instance Configuration (per module)
 # -----------------------------------------------------------------------------
-# Rancher Manager
+# SUSE Rancher Manager
 rancher_instance_type      = "t3.xlarge"
 rancher_root_volume_size   = 100
 
-# SUSE Observability
-observability_instance_type     = "t3.xlarge"  # Minimum for 10-nonha profile
+# SUSE Observability (StackState)
+observability_instance_type     = "t3.2xlarge"  # Minimum for 10-nonha profile
 observability_root_volume_size  = 300          # Minimum 280GB for 10-nonha profile
 
-# Security/NeuVector
+# SUSE Security (NeuVector)
 security_instance_type      = "t3.large"
 security_root_volume_size   = 100
 
@@ -95,7 +95,7 @@ rancher_version      = "2.12.2"
 cert_manager_version = "1.15.3"
 
 # -----------------------------------------------------------------------------
-# SUSE Observability Configuration
+# SUSE Observability (StackState) Configuration
 # -----------------------------------------------------------------------------
 suse_observability_license = "YOUR_SUSE_OBSERVABILITY_LICENSE_KEY"
 suse_observability_base_url = "https://observability.suse-demo-aws.kubernerdes.com"
@@ -103,7 +103,7 @@ suse_rancher_url = "https://rancher.suse-demo-aws.kubernerdes.com"
 suse_observability_admin_password = ""  # Leave empty to auto-generate
 
 # -----------------------------------------------------------------------------
-# Security/NeuVector Configuration
+# SUSE Security (NeuVector) Configuration
 # -----------------------------------------------------------------------------
 neuvector_version = "5.3.4"
 

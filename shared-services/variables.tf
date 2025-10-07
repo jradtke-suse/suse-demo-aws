@@ -50,9 +50,3 @@ variable "allowed_ssh_cidr_blocks" {
   type        = list(string)
   default     = ["0.0.0.0/0"] # Change this to your IP for better security
 }
-
-variable "allowed_web_cidr_blocks" {
-  description = "CIDR blocks allowed to access web interfaces"
-  type        = list(string)
-  default     = ["0.0.0.0/0"] # Change this to your IP for better security
-}
