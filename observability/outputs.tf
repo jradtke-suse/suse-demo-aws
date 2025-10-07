@@ -55,7 +55,7 @@ output "security_group_id" {
 
 output "ssh_command" {
   description = "SSH command to connect to instance"
-  value       = var.ssh_public_key != "" ? "ssh ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}" : "Use AWS Systems Manager Session Manager to connect"
+  value       = var.ssh_public_key != "" ? "ssh -i suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}" : "Use AWS Systems Manager Session Manager to connect"
 }
 
 output "kubectl_commands" {
