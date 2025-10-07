@@ -34,8 +34,10 @@ echo "SLES registration completed successfully"
 zypper refresh
 zypper update -y
 
+#######################################
 # Install required packages
-zypper install -y curl git-core
+#######################################
+zypper install -y curl wget git-core
 
 # Install kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
