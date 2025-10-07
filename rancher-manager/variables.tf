@@ -16,7 +16,7 @@ variable "owner" {
   default     = "suse-demo"
 }
 
-variable "instance_type" {
+variable "rancher_instance_type" {
   description = "EC2 instance type for Rancher server"
   type        = string
   default     = "t3.xlarge"
@@ -28,7 +28,7 @@ variable "ami_id" {
   default     = ""
 }
 
-variable "root_volume_size" {
+variable "rancher_root_volume_size" {
   description = "Size of root volume in GB"
   type        = number
   default     = 100

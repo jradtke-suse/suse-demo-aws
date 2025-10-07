@@ -54,54 +54,89 @@ Deploy projects in the following order to ensure dependencies are met:
 
 ## Quick Start
 
-### 1. Deploy Shared Services
+### 1. Configure Variables
+
+Edit the root `terraform.tfvars` file with your settings:
+
+```bash
+vi terraform.tfvars
+```
+
+Update key values:
+- `owner` - Your name/identifier
+- `ssh_public_key` - Your SSH public key
+- `suse_email` and `suse_regcode` - SUSE subscription details
+- `allowed_ssh_cidr_blocks` and `allowed_web_cidr_blocks` - Your IP for security
+- Instance types and sizes (if different from defaults)
+
+### 2. Deploy Shared Services
 
 ```bash
 cd shared-services
 terraform init
-terraform plan
-terraform apply
+terraform plan -var-file=../terraform.tfvars
+terraform apply -var-file=../terraform.tfvars
 ```
 
-### 2. Deploy SUSE Rancher Manager
+### 3. Deploy SUSE Rancher Manager
 
 ```bash
 cd ../rancher-manager
 terraform init
-terraform plan
-terraform apply
+terraform plan -var-file=../terraform.tfvars
+terraform apply -var-file=../terraform.tfvars
 ```
 
-### 3. Deploy SUSE Observability
+### 4. Deploy SUSE Observability
 
 ```bash
 cd ../observability
 terraform init
-terraform plan
-terraform apply
+terraform plan -var-file=../terraform.tfvars
+terraform apply -var-file=../terraform.tfvars
 ```
 
-### 4. Deploy SUSE Security
+### 5. Deploy SUSE Security
 
 ```bash
 cd ../security
 terraform init
-terraform plan
-terraform apply
+terraform plan -var-file=../terraform.tfvars
+terraform apply -var-file=../terraform.tfvars
 ```
 
 ## Configuration
 
-Each project has its own `terraform.tfvars` file for customization. Review and update these files before deployment.
+**NEW:** All projects now share a single unified `terraform.tfvars` file at the repository root. This simplifies configuration management and ensures consistency across all modules.
+
+### Key Changes
+- **Single Configuration File:** Edit `terraform.tfvars` at the root for all modules
+- **Module-Specific Variables:** Instance types and volumes are now prefixed:
+  - `rancher_instance_type`, `rancher_root_volume_size`
+  - `observability_instance_type`, `observability_root_volume_size`
+  - `security_instance_type`, `security_root_volume_size`
+- **Common Variables:** Shared variables defined in `common-vars.tf` (symlinked into each module)
+
+### Usage
+When running Terraform commands, reference the root configuration file:
+
+```bash
+cd shared-services
+terraform plan -var-file=../terraform.tfvars
+terraform apply -var-file=../terraform.tfvars
+```
+
+Apply the same pattern for all modules (rancher-manager, observability, security).
 
 ## Cleanup
 
 To destroy all resources, run `terraform destroy` in reverse order:
 
-Note: you will need to type "yes" and hit (enter) - I intentionally did not make this non-interactive
+**Important:** Destroy in reverse order to respect state dependencies. You must type "yes" and hit enter for each module.
+
 ```bash
-cd ./security && terraform destroy && cd -
-cd ./observability && terraform destroy &&  cd -
-cd ./rancher-manager && terraform destroy && cd -
-cd ./shared-services && terraform destroy &&  cd -
+cd security && terraform destroy -var-file=../terraform.tfvars && cd ..
+cd observability && terraform destroy -var-file=../terraform.tfvars && cd ..
+cd rancher-manager && terraform destroy -var-file=../terraform.tfvars && cd ..
+cd shared-services && terraform destroy -var-file=../terraform.tfvars && cd ..
 ```

@@ -1,3 +1,23 @@
+# =============================================================================
+# DEPRECATED: This file is deprecated in favor of a unified configuration
+# =============================================================================
+# Please use the unified terraform.tfvars file at the repository root instead.
+#
+# Usage:
+#   cd observability
+#   terraform apply -var-file=../terraform.tfvars
+#
+# The root terraform.tfvars file contains all configuration for all modules.
+# See ../terraform.tfvars for the complete configuration template.
+#
+# Note: The variable 'instance_type' has been renamed to 'observability_instance_type'
+# and 'root_volume_size' has been renamed to 'observability_root_volume_size'.
+#
+# Configuration Requirements for SUSE Observability:
+# - Minimum instance type: t3.xlarge (4 vCPU, 16GB RAM) for 10-nonha profile
+# - Minimum volume size: 280GB (with 30 days retention)
+# =============================================================================
+
 # AWS Configuration
 aws_region  = "us-east-2"
 environment = "demo"
@@ -5,10 +25,10 @@ owner       = "your-name"
 
 # EC2 Instance Configuration
 # Minimum t3.xlarge for 10-nonha profile (4 vCPU, 16GB RAM)
-instance_type = "t3.xlarge"
+observability_instance_type = "t3.xlarge"
 
 # Minimum 280GB required for 10-nonha profile
-root_volume_size = 300
+observability_root_volume_size = 300
 
 # SSH Access
 ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2E..."

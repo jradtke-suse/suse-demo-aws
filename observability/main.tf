@@ -168,7 +168,7 @@ resource "aws_key_pair" "observability" {
 # EC2 Instance for Observability
 resource "aws_instance" "observability" {
   ami                    = var.ami_id != "" ? var.ami_id : data.aws_ami.sles.id
-  instance_type          = var.instance_type
+  instance_type          = var.observability_instance_type
   subnet_id              = data.terraform_remote_state.shared.outputs.public_subnet_ids[0]
   key_name               = var.ssh_public_key != "" ? aws_key_pair.observability[0].key_name : null
   iam_instance_profile   = aws_iam_instance_profile.observability.name
@@ -179,7 +179,7 @@ resource "aws_instance" "observability" {
   ]
 
   root_block_device {
-    volume_size           = var.root_volume_size
+    volume_size           = var.observability_root_volume_size
     volume_type           = "gp3"
     delete_on_termination = true
     encrypted             = true

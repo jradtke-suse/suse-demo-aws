@@ -16,7 +16,7 @@ variable "owner" {
   default     = "suse-demo"
 }
 
-variable "instance_type" {
+variable "observability_instance_type" {
   description = "EC2 instance type for Observability server (minimum t3.xlarge for 10-nonha profile)"
   type        = string
   default     = "t3.xlarge"
@@ -28,7 +28,7 @@ variable "ami_id" {
   default     = ""
 }
 
-variable "root_volume_size" {
+variable "observability_root_volume_size" {
   description = "Size of root volume in GB (minimum 280GB for 10-nonha profile)"
   type        = number
   default     = 300
