@@ -41,19 +41,13 @@ allowed_cidr_blocks     = ["0.0.0.0/0"]
 ssh_public_key = ""
 
 # **********************************************************************
-# aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
+#  aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
 #  aws ec2 describe-key-pairs --region us-east-2  --key-name suse-demo-aws --include-public-key --query "KeyPairs[0].PublicKey" --output text
 # You can also use the following to gather your pub.key
 #  ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub; cat suse-demo-aws.pub
 # NOTE:  the terraform apply will create suse-demo-aws-rancher-key also
-# ssh -i suse-demo-aws.pem ec2-user@rancher.suse-demo-aws.kubernerdes.com
+#  ssh -i suse-demo-aws.pem ec2-user@rancher.suse-demo-aws.kubernerdes.com
 # **********************************************************************
-
-# Commands to create/retrieve SSH key:
-# aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem
-# chmod 0600 suse-demo-aws.pem
-# ssh-keygen -y -f suse-demo-aws.pem > suse-demo-aws.pub
-# cat suse-demo-aws.pub
 
 # -----------------------------------------------------------------------------
 # EC2 Instance Configuration (per module)
