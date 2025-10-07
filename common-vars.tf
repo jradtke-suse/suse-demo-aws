@@ -145,6 +145,25 @@ variable "route53_zone_id" {
   default     = ""
 }
 
+# DNS Hostnames (per product)
+variable "hostname_rancher" {
+  description = "Hostname for Rancher Manager service (e.g., rancher). Creates hostname.subdomain.root_domain"
+  type        = string
+  default     = "rancher"
+}
+
+variable "hostname_observability" {
+  description = "Hostname for SUSE Observability service (e.g., observability). Creates hostname.subdomain.root_domain"
+  type        = string
+  default     = "observability"
+}
+
+variable "hostname_security" {
+  description = "Hostname for SUSE Security/NeuVector service (e.g., security). Creates hostname.subdomain.root_domain"
+  type        = string
+  default     = "security"
+}
+
 # SUSE Registration
 variable "suse_email" {
   description = "SUSE Email Address used to register to SCC"

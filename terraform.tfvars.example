@@ -77,6 +77,11 @@ root_domain           = "kubernerdes.com"
 subdomain             = "suse-demo-aws"
 route53_zone_id       = ""  # Leave empty to auto-discover
 
+# DNS Hostnames (per product)
+hostname_rancher       = "rancher"
+hostname_observability = "observability"
+hostname_security      = "security"
+
 # To find your Route53 zone ID:
 # aws route53 list-hosted-zones-by-name --dns-name suse-demo-aws.kubernerdes.com --query "HostedZones[].Id" --output text
 

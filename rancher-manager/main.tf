@@ -58,7 +58,7 @@ data "aws_route53_zone" "main" {
 # Local variable for hostname
 locals {
   # Build FQDN: hostname.subdomain.root_domain (e.g., rancher.suse-demo-aws.kubernerdes.com)
-  rancher_fqdn = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname}.${var.subdomain}.${var.root_domain}" : "rancher.${var.environment}.local"
+  rancher_fqdn = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname_rancher}.${var.subdomain}.${var.root_domain}" : "rancher.${var.environment}.local"
   zone_id      = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? data.aws_route53_zone.main[0].zone_id : "")
   scc_suse_email = var.suse_email
   scc_regcode = var.suse_regcode
@@ -207,7 +207,7 @@ resource "aws_eip" "rancher" {
 resource "aws_route53_record" "rancher" {
   count   = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? 1 : 0
   zone_id = local.zone_id
-  name    = "${var.hostname}.${var.subdomain}.${var.root_domain}"
+  name    = "${var.hostname_rancher}.${var.subdomain}.${var.root_domain}"
   type    = "A"
   ttl     = 300
   records = [var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip]
