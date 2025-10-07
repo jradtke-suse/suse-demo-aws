@@ -23,6 +23,24 @@ allowed_cidr_blocks = ["0.0.0.0/0"]
 # Set to true for stable public IP address
 create_eip = true
 
+# DNS Configuration (Route53)
+# Set to true to create a Route53 A record
+create_route53_record = false
+
+# DNS hostname (default: observability)
+hostname = "observability"
+
+# DNS subdomain (default: suse-demo-aws)
+subdomain = "suse-demo-aws"
+
+# Root domain (default: kubernerdes.com)
+root_domain = "kubernerdes.com"
+
+# Route53 Hosted Zone ID (leave empty to auto-discover from subdomain.root_domain)
+# If provided, this will be used instead of auto-discovery
+# Example: "Z1234567890ABC"
+route53_zone_id = ""
+
 # SUSE Observability Configuration (REQUIRED)
 # License key from SUSE - REQUIRED
 suse_observability_license = "YOUR_SUSE_OBSERVABILITY_LICENSE_KEY"

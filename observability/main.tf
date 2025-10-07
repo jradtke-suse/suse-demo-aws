@@ -23,6 +23,12 @@ provider "aws" {
   }
 }
 
+locals {
+  # Build FQDN: hostname.subdomain.root_domain (e.g., observability.suse-demo-aws.kubernerdes.com)
+  observability_fqdn = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname}.${var.subdomain}.${var.root_domain}" : "observability.${var.environment}.local"
+  zone_id            = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? data.aws_route53_zone.main[0].zone_id : "")
+}
+
 # Data source to get shared services outputs
 data "terraform_remote_state" "shared" {
   backend = "local"
@@ -30,6 +36,13 @@ data "terraform_remote_state" "shared" {
   config = {
     path = "${path.module}/../shared-services/terraform.tfstate"
   }
+}
+
+# Data source to lookup Route53 hosted zone (only if creating DNS record)
+data "aws_route53_zone" "main" {
+  count        = var.create_route53_record && var.route53_zone_id == "" && var.subdomain != "" && var.root_domain != "" ? 1 : 0
+  name         = "${var.subdomain}.${var.root_domain}."
+  private_zone = false
 }
 
 # Get latest SLES AMI
@@ -195,4 +208,14 @@ resource "aws_eip" "observability" {
   tags = {
     Name = "${var.environment}-observability-eip"
   }
+}
+
+# Route53 A Record for SUSE Observability
+resource "aws_route53_record" "observability" {
+  count   = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? 1 : 0
+  zone_id = local.zone_id
+  name    = "${var.hostname}.${var.subdomain}.${var.root_domain}"
+  type    = "A"
+  ttl     = 300
+  records = [var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip]
 }

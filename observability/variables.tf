@@ -52,6 +52,36 @@ variable "create_eip" {
   default     = true
 }
 
+variable "create_route53_record" {
+  description = "Create Route53 DNS record for SUSE Observability"
+  type        = bool
+  default     = false
+}
+
+variable "root_domain" {
+  description = "Root domain name (e.g., kubernerdes.com)"
+  type        = string
+  default     = "kubernerdes.com"
+}
+
+variable "subdomain" {
+  description = "Environment subdomain (e.g., suse-demo-aws)"
+  type        = string
+  default     = "suse-demo-aws"
+}
+
+variable "hostname" {
+  description = "Hostname for Observability service (e.g., observability). Creates hostname.subdomain.root_domain"
+  type        = string
+  default     = "observability"
+}
+
+variable "route53_zone_id" {
+  description = "Route53 Hosted Zone ID (leave empty to auto-discover from subdomain.root_domain)"
+  type        = string
+  default     = ""
+}
+
 variable "suse_observability_license" {
   description = "SUSE Observability license key (required)"
   type        = string
