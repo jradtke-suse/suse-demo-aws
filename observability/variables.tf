@@ -93,6 +93,11 @@ variable "suse_observability_base_url" {
   type        = string
 }
 
+variable "suse_rancher_url" {
+  description = "Base URL for SUSE Rancher (e.g., https://rancher.example.com)"
+  type        = string
+}
+
 variable "suse_observability_admin_password" {
   description = "Admin password for SUSE Observability (auto-generated if empty)"
   type        = string
