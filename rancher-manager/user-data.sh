@@ -57,7 +57,7 @@ until systemctl is-active --quiet k3s; do
   sleep 5
 done
 
-# Set up kubeconfig for root
+# Set up kubeconfig and bash ENV for root
 mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config

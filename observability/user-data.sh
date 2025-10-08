@@ -63,12 +63,16 @@ until systemctl is-active --quiet k3s; do
   sleep 5
 done
 
-# Set up kubeconfig
+# Set up kubeconfig and bash ENV for root
 mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
 export KUBECONFIG=/root/.kube/config
-echo "export KUBECONFIG=/root/.kube/config" >> /root/.bashrc
+echo << EOF | tee -a /root/.bashrc
+export KUBECONFIG=/root/.kube/config
+alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
+alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
+EOF
 
 # Verify K3s installation
 # Wait for K3s API server to be responsive
@@ -124,6 +128,7 @@ kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manage
 #######################################
 echo "Installing SUSE Observability (StackState)..."
 
+# I do this in a separate/well-known directory - not necessary
 mkdir -p ~/Developer/Projects/observability.suse-demo-aws.kubernerdes.lab; cd $_
 
 # Add the SUSE Observability Helm Repo
@@ -151,6 +156,8 @@ helm upgrade --install \
     suse-observability/suse-observability
 
 kubectl get all -n suse-observability
+
+# Need to add check/wait here before proceeding
 
 # temp port forward
 kubectl port-forward service/suse-observability-router 8080:8080 --namespace suse-observability
@@ -187,10 +194,9 @@ echo "SUSE Observability is deployed on Kubernetes (K3s)"
 echo "Sizing Profile: 10-nonha (non-HA, up to 10 nodes)"
 echo ""
 echo "Access Information:"
-echo "  URL: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8080"
 echo "  Base URL: ${suse_observability_base_url}"
 echo "  Username: admin"
-echo "  Password: See /root/suse-observability-credentials.txt"
+echo "  $(grep 'admin password' $(find $HOME -name baseConfig_values.yaml))"
 echo ""
 echo "Kubernetes (K3s) Access:"
 echo "  KUBECONFIG: /etc/rancher/k3s/k3s.yaml"
