@@ -31,7 +31,7 @@ output "fqdn" {
 output "route53_record" {
   description = "Route53 DNS record (if created)"
   value = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? {
-    fqdn    = "${var.hostname}.${var.subdomain}.${var.root_domain}"
+    fqdn    = "${var.hostname_observability}.${var.subdomain}.${var.root_domain}"
     zone_id = local.zone_id
     type    = "A"
     value   = var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip

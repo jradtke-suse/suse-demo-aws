@@ -189,9 +189,14 @@ resource "aws_instance" "observability" {
     suse_observability_license        = var.suse_observability_license
     suse_observability_base_url       = var.suse_observability_base_url
     suse_observability_admin_password = var.suse_observability_admin_password
+    suse_rancher_url                  = var.suse_rancher_url
     suse_email                        = var.suse_email
     suse_regcode                      = var.suse_regcode
     smt_url                           = var.smt_url
+    cert_manager_version              = var.cert_manager_version
+    hostname                          = var.hostname_observability
+    subdomain                         = var.subdomain
+    root_domain                       = var.root_domain
   })
 
   tags = {
