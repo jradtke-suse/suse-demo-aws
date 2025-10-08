@@ -53,11 +53,6 @@ output "security_group_id" {
   value       = aws_security_group.observability.id
 }
 
-output "ssh_command" {
-  description = "SSH command to connect to instance"
-  value       = var.ssh_public_key != "" ? "ssh -i suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}" : "Use AWS Systems Manager Session Manager to connect"
-}
-
 output "kubectl_commands" {
   description = "Useful kubectl commands for managing SUSE Observability"
   value = <<-EOT
@@ -84,4 +79,9 @@ output "deployment_info" {
     kubernetes     = "K3s (lightweight)"
     namespace      = "suse-observability"
   }
+}
+
+output "ssh_command" {
+  description = "SSH command to connect to instance"
+  value       = var.ssh_public_key != "" ? "ssh -i suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip}" : "Use AWS Systems Manager Session Manager to connect"
 }
