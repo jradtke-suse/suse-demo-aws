@@ -3,7 +3,7 @@
 This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.  This demo will have a cost associated with it.  I will eventually publish some cost estimates (with AWS Calculator output).  My demo also uses SLES.
 
 ## Status
-This is very much a work-in-progress at this time (2025-10-06).  I hope to have the Rancher Manager portion finished up soon (Mid-Oct) and then O11y, then Security.
+This is very much a work-in-progress at this time (2025 October).  
 
 | Project | Status |
 |:--------|:------:|
