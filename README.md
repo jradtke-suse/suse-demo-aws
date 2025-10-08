@@ -41,7 +41,7 @@ The demo environment is organized into separate Terraform projects:
 
 - SUSE Customer Center login and registration for SLES Hosts
 - AWS CLI configured with appropriate credentials
-- A Top-Level Domain (TLD) that you own/manage, and ability to modify records with the IAM principal you utilze.
+- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have a permissions to modify records with the IAM principal you utilze.
 - Terraform >= 1.5.0
 
 During the deployment you will need to obtain or create
