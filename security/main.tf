@@ -26,7 +26,9 @@ provider "aws" {
 locals {
   # Build FQDN: hostname.subdomain.root_domain (e.g., security.suse-demo-aws.kubernerdes.com)
   security_fqdn = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname_security}.${var.subdomain}.${var.root_domain}" : "security.${var.environment}.local"
-  zone_id       = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? data.aws_route53_zone.main[0].zone_id : "")
+  # Get zone ID and strip /hostedzone/ prefix if present (handles user input like "/hostedzone/Z123" or "Z123")
+  raw_zone_id   = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? data.aws_route53_zone.main[0].zone_id : "")
+  zone_id       = replace(local.raw_zone_id, "/^\\/hostedzone\\//", "")
 }
 
 # Data source to get shared services outputs
