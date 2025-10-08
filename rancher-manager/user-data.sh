@@ -47,7 +47,8 @@ install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Install K3s
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --cluster-init" sh -
+curl -sfL https://get.k3s.io | sh -s - server
+# curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --cluster-init" sh -
 
 # Wait for K3s service to be active
 echo "Waiting for K3s service to be active..."
@@ -56,12 +57,16 @@ until systemctl is-active --quiet k3s; do
   sleep 5
 done
 
-# Set up kubeconfig
+# Set up kubeconfig for root
 mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
 export KUBECONFIG=/root/.kube/config
-echo "export KUBECONFIG=/root/.kube/config" >> /root/.bashrc
+echo << EOF | tee -a /root/.bashrc
+export KUBECONFIG=/root/.kube/config
+alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
+alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
+EOF
 
 # Wait for K3s API server to be responsive
 echo "Waiting for K3s API server to be ready..."
