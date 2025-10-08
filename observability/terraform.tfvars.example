@@ -4,109 +4,13 @@
 # Please use the unified terraform.tfvars file at the repository root instead.
 #
 # Usage:
-#   cd observability
+#   cd rancher-manager
 #   terraform apply -var-file=../terraform.tfvars
 #
 # The root terraform.tfvars file contains all configuration for all modules.
 # See ../terraform.tfvars for the complete configuration template.
 #
-# Note: The variable 'instance_type' has been renamed to 'observability_instance_type'
-# and 'root_volume_size' has been renamed to 'observability_root_volume_size'.
-#
-# Configuration Requirements for SUSE Observability:
-# - Minimum instance type: t3.xlarge (4 vCPU, 16GB RAM) for 10-nonha profile
-# - Minimum volume size: 280GB (with 30 days retention)
-# =============================================================================
+# Note: The variable 'instance_type' has been renamed to 'rancher_instance_type'
+# and 'root_volume_size' has been renamed to 'rancher_root_volume_size'.
+# ============================================================================= 
 
-# AWS Configuration
-aws_region  = "us-east-2"
-environment = "demo"
-owner       = "your-name"
-
-# EC2 Instance Configuration
-# Minimum t3.xlarge for 10-nonha profile (4 vCPU, 16GB RAM)
-observability_instance_type = "t3.xlarge"
-
-# Minimum 280GB required for 10-nonha profile
-observability_root_volume_size = 300
-
-# SSH Access
-ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2E..."
-
-# Network Access Control
-# Restrict to your IP for security: ["YOUR.IP.ADDRESS/32"]
-allowed_cidr_blocks = ["0.0.0.0/0"]
-
-# Elastic IP
-# Set to true for stable public IP address
-create_eip = true
-
-# DNS Configuration (Route53)
-# Set to true to create a Route53 A record
-create_route53_record = false
-
-# DNS hostname (default: observability)
-hostname = "observability"
-
-# DNS subdomain (default: suse-demo-aws)
-subdomain = "suse-demo-aws"
-
-# Root domain (default: kubernerdes.com)
-root_domain = "kubernerdes.com"
-
-# Route53 Hosted Zone ID (leave empty to auto-discover from subdomain.root_domain)
-# If provided, this will be used instead of auto-discovery
-# Example: "Z1234567890ABC"
-route53_zone_id = ""
-
-# SUSE Observability Configuration (REQUIRED)
-# License key from SUSE - REQUIRED
-suse_observability_license = "YOUR_SUSE_OBSERVABILITY_LICENSE_KEY"
-
-# Base URL for SUSE Observability
-# This should be the URL where you'll access the UI
-# Examples:
-#   - "https://observability.suse-demo-aws.kubernerdes.com"
-#   - "http://observability.example.com"
-suse_observability_base_url = "https://observability.suse-demo-aws.kubernerdes.com"
-
-# SUSE Rancher Manager URL (eg. https://rancher.suse-demo-aws.kubernerdes.com)
-suse_rancher_url = "https://rancher.suse-demo-aws.kubernerdes.com"
-
-# Admin password for SUSE Observability (optional)
-# Leave empty to auto-generate a password
-# Auto-generated password will be available in /root/suse-observability-credentials.txt on the instance
-suse_observability_admin_password = ""
-
-# SUSE Customer Center Registration (REQUIRED for SLES)
-# Email address registered with SUSE
-suse_email = "your-email@example.com"
-
-# SUSE registration code for SLES
-suse_regcode = "YOUR_SLES_REGISTRATION_CODE"
-
-# SMT/RMT Server (optional)
-# Leave empty to use SUSE Customer Center directly
-# smt_url = ""
-
-# Deployment Information
-# ----------------------
-# Sizing Profile: 10-nonha (non-HA, suitable for up to 10 Kubernetes nodes)
-# Resource Requirements:
-#   - CPU: 7.5 requests / 16 limits
-#   - Memory: 25.5Gi requests / 26Gi limits
-#   - Storage: 280GB (with 30 days retention)
-# Kubernetes: K3s (lightweight Kubernetes distribution)
-# Namespace: suse-observability
-#
-# Access Information (after deployment):
-#   - SUSE Observability UI: http://<public-ip>:8080
-#   - Username: admin
-#   - Password: See /root/suse-observability-credentials.txt on instance
-#   - SSH: ssh ec2-user@<public-ip>
-#   - KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-#
-# Useful Commands:
-#   - Check deployment: terraform output kubectl_commands
-#   - View credentials: ssh ec2-user@<ip> "sudo cat /root/suse-observability-credentials.txt"
-#   - Check pods: ssh ec2-user@<ip> "sudo kubectl get pods -n suse-observability"
