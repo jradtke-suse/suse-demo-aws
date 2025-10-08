@@ -21,7 +21,6 @@ This is very much a work-in-progress at this time (2025-10-06).  I hope to have 
 
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 
-
 ## Products Included
 
 - **SUSE Rancher Manager** - Kubernetes management platform
@@ -40,8 +39,12 @@ The demo environment is organized into separate Terraform projects:
 ## Prerequisites
 
 - AWS CLI configured with appropriate credentials
+- A Top-Level Domain (TLD) that you own/manage, and ability to modify records with the IAM principal you utilze.
 - Terraform >= 1.5.0
+
+During the deployment you will need to obtain or create
 - SSH key pair for EC2 instances
+- HostedZoneId for your TLD
 
 ## Deployment Order
 
