@@ -40,7 +40,6 @@ allowed_cidr_blocks     = ["0.0.0.0/0"]
 # Paste your SSH public key here
 ssh_public_key = ""
 
-# **********************************************************************
 #  aws ec2 create-key-pair --key-name suse-demo-aws --region us-east-2 --query "KeyMaterial" --output text > suse-demo-aws.pem; chmod 0600 suse-demo-aws.pem
 #  aws ec2 describe-key-pairs --region us-east-2  --key-name suse-demo-aws --include-public-key --query "KeyPairs[0].PublicKey" --output text
 # You can also use the following to gather your pub.key
@@ -72,18 +71,17 @@ create_eip = true
 # -----------------------------------------------------------------------------
 # DNS Configuration (Route53 - optional)
 # -----------------------------------------------------------------------------
-create_route53_record = false
+create_route53_record = true 
 root_domain           = "kubernerdes.com"
 subdomain             = "suse-demo-aws"
 route53_zone_id       = ""  # Leave empty to auto-discover
+# To find your Route53 zone ID:
+# aws route53 list-hosted-zones-by-name --dns-name suse-demo-aws.kubernerdes.com --query "HostedZones[].Id" --output text
 
 # DNS Hostnames (per product)
 hostname_rancher       = "rancher"
 hostname_observability = "observability"
 hostname_security      = "security"
-
-# To find your Route53 zone ID:
-# aws route53 list-hosted-zones-by-name --dns-name suse-demo-aws.kubernerdes.com --query "HostedZones[].Id" --output text
 
 # -----------------------------------------------------------------------------
 # SUSE Registration (all modules)
