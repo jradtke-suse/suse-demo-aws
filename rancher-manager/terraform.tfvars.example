@@ -5,6 +5,7 @@
 #
 # Usage:
 #   cd rancher-manager
+#   terraform plan -var-file=../terraform.tfvars
 #   terraform apply -var-file=../terraform.tfvars
 #
 # The root terraform.tfvars file contains all configuration for all modules.
