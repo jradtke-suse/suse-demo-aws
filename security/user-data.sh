@@ -55,6 +55,42 @@ done
 mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
+export KUBECONFIG=/root/.kube/config
+
+#######################################
+# Install cert-manager
+#######################################
+echo "Installing cert-manager..."
+
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v${cert_manager_version}/cert-manager.crds.yaml
+
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+kubectl create namespace cert-manager || true
+
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --version v${cert_manager_version} \
+  --wait
+
+# Wait for cert-manager to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
+
+#######################################
+# Configure Let's Encrypt (if enabled)
+#######################################
+%{ if enable_letsencrypt ~}
+echo "Configuring Let's Encrypt with cert-manager..."
+
+# Create ClusterIssuer for Let's Encrypt
+cat <<'ISSUER_EOF' | kubectl apply -f -
+${letsencrypt_clusterissuer}
+ISSUER_EOF
+
+echo "Let's Encrypt ClusterIssuers created (staging and production)"
+echo "Using environment: ${letsencrypt_environment}"
+%{ endif ~}
 
 # Install NeuVector
 kubectl create namespace neuvector || true
@@ -92,6 +128,21 @@ helm install neuvector neuvector/core \
 
 # Wait for NeuVector to be ready
 kubectl wait --for=condition=ready pod -l app=neuvector-manager-pod -n neuvector --timeout=300s
+
+#######################################
+# Create Let's Encrypt Certificate (if enabled)
+#######################################
+%{ if enable_letsencrypt ~}
+echo "Creating Let's Encrypt certificate for NeuVector..."
+
+# Create Certificate resource for NeuVector
+cat <<'CERT_EOF' | kubectl apply -f -
+${letsencrypt_certificate}
+CERT_EOF
+
+echo "Certificate resource created - cert-manager will request certificate from Let's Encrypt"
+echo "Monitor certificate status with: kubectl describe certificate security-tls -n neuvector"
+%{ endif ~}
 
 # Install Trivy
 wget https://github.com/aquasecurity/trivy/releases/download/v0.56.2/trivy_0.56.2_Linux-64bit.rpm

@@ -84,6 +84,20 @@ hostname_observability = "observability"
 hostname_security      = "security"
 
 # -----------------------------------------------------------------------------
+# Let's Encrypt Configuration (all product modules)
+# -----------------------------------------------------------------------------
+# Enable automatic TLS certificate provisioning via Let's Encrypt
+# Requires: create_route53_record = true and valid letsencrypt_email
+enable_letsencrypt      = false
+letsencrypt_email       = "your-email@example.com"
+letsencrypt_environment = "staging"  # Use "staging" for testing, "production" for real certs
+
+# NOTE: Let's Encrypt uses Route53 DNS-01 challenge for certificate validation
+# - Staging environment: Higher rate limits, issues test certificates (use for testing)
+# - Production environment: Lower rate limits, issues trusted certificates (use when ready)
+# - Switch from staging to production after confirming everything works
+
+# -----------------------------------------------------------------------------
 # SUSE Registration (all modules)
 # -----------------------------------------------------------------------------
 # IMPORTANT: Update these with your SUSE subscription details

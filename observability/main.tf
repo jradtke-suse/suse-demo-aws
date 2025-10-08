@@ -154,6 +154,52 @@ resource "aws_iam_role_policy_attachment" "observability_ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+# IAM Policy for cert-manager Route53 DNS-01 challenge
+resource "aws_iam_policy" "cert_manager_route53" {
+  count       = var.enable_letsencrypt && var.create_route53_record ? 1 : 0
+  name_prefix = "${var.environment}-observability-certmanager-route53-"
+  description = "Allow cert-manager to manage Route53 records for DNS-01 challenge"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:GetChange"
+        ]
+        Resource = "arn:aws:route53:::change/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ChangeResourceRecordSets",
+          "route53:ListResourceRecordSets"
+        ]
+        Resource = "arn:aws:route53:::hostedzone/${local.zone_id}"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ListHostedZonesByName"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.environment}-observability-certmanager-route53-policy"
+  }
+}
+
+# Attach Route53 policy to Observability IAM role
+resource "aws_iam_role_policy_attachment" "observability_cert_manager_route53" {
+  count      = var.enable_letsencrypt && var.create_route53_record ? 1 : 0
+  role       = aws_iam_role.observability.name
+  policy_arn = aws_iam_policy.cert_manager_route53[0].arn
+}
+
 # Key Pair
 resource "aws_key_pair" "observability" {
   count      = var.ssh_public_key != "" ? 1 : 0
@@ -197,6 +243,16 @@ resource "aws_instance" "observability" {
     hostname                          = var.hostname_observability
     subdomain                         = var.subdomain
     root_domain                       = var.root_domain
+    enable_letsencrypt                = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != ""
+    letsencrypt_environment           = var.letsencrypt_environment
+    letsencrypt_clusterissuer         = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != "" ? templatefile("${path.module}/letsencrypt-clusterissuer.yaml.tpl", {
+      letsencrypt_email = var.letsencrypt_email
+      aws_region        = var.aws_region
+    }) : ""
+    letsencrypt_certificate = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != "" ? templatefile("${path.module}/letsencrypt-certificate.yaml.tpl", {
+      hostname                = local.observability_fqdn
+      letsencrypt_environment = var.letsencrypt_environment
+    }) : ""
   })
 
   tags = {

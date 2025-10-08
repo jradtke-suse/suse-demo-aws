@@ -111,6 +111,29 @@ helm install cert-manager jetstack/cert-manager \
 # Wait for cert-manager to be ready
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
 
+#######################################
+# Configure Let's Encrypt (if enabled)
+#######################################
+%{ if enable_letsencrypt ~}
+echo "Configuring Let's Encrypt with cert-manager..."
+
+# Create ClusterIssuer for Let's Encrypt
+cat <<'ISSUER_EOF' | kubectl apply -f -
+${letsencrypt_clusterissuer}
+ISSUER_EOF
+
+echo "Let's Encrypt ClusterIssuers created (staging and production)"
+
+# Create Certificate resource for Rancher
+cat <<'CERT_EOF' | kubectl apply -f -
+${letsencrypt_certificate}
+CERT_EOF
+
+echo "Certificate resource created for Rancher - cert-manager will request certificate from Let's Encrypt"
+echo "Using environment: ${letsencrypt_environment}"
+echo "Monitor certificate status with: kubectl describe certificate rancher-tls -n cattle-system"
+%{ endif ~}
+
 # Install Rancher
 helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 helm repo update

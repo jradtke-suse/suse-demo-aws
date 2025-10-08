@@ -235,3 +235,27 @@ variable "ami_id" {
   type        = string
   default     = ""
 }
+
+# Let's Encrypt Configuration
+variable "letsencrypt_email" {
+  description = "Email address for Let's Encrypt certificate notifications"
+  type        = string
+  default     = ""
+}
+
+variable "letsencrypt_environment" {
+  description = "Let's Encrypt environment: 'staging' for testing, 'production' for real certificates"
+  type        = string
+  default     = "staging"
+
+  validation {
+    condition     = contains(["staging", "production"], var.letsencrypt_environment)
+    error_message = "The letsencrypt_environment must be either 'staging' or 'production'."
+  }
+}
+
+variable "enable_letsencrypt" {
+  description = "Enable Let's Encrypt certificate automation via cert-manager"
+  type        = bool
+  default     = false
+}
