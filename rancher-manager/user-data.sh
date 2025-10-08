@@ -112,10 +112,10 @@ helm install cert-manager jetstack/cert-manager \
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
 
 #######################################
-# Configure Let's Encrypt (if enabled)
+# Configure Let's Encrypt ClusterIssuer (if enabled)
 #######################################
 %{ if enable_letsencrypt ~}
-echo "Configuring Let's Encrypt with cert-manager..."
+echo "Configuring Let's Encrypt ClusterIssuer..."
 
 # Create ClusterIssuer for Let's Encrypt
 cat <<'ISSUER_EOF' | kubectl apply -f -
@@ -123,15 +123,7 @@ ${letsencrypt_clusterissuer}
 ISSUER_EOF
 
 echo "Let's Encrypt ClusterIssuers created (staging and production)"
-
-# Create Certificate resource for Rancher
-cat <<'CERT_EOF' | kubectl apply -f -
-${letsencrypt_certificate}
-CERT_EOF
-
-echo "Certificate resource created for Rancher - cert-manager will request certificate from Let's Encrypt"
 echo "Using environment: ${letsencrypt_environment}"
-echo "Monitor certificate status with: kubectl describe certificate rancher-tls -n cattle-system"
 %{ endif ~}
 
 # Install Rancher
@@ -156,6 +148,21 @@ kubectl -n cattle-system wait --for=condition=available --timeout=600s deploymen
 # Wait for Rancher pods to be fully running
 echo "Waiting for Rancher pods to be ready..."
 kubectl -n cattle-system wait --for=condition=ready --timeout=600s pod -l app=rancher
+
+#######################################
+# Create Let's Encrypt Certificate (if enabled)
+#######################################
+%{ if enable_letsencrypt ~}
+echo "Creating Let's Encrypt Certificate for Rancher..."
+
+# Now that cattle-system namespace exists, create the Certificate resource
+cat <<'CERT_EOF' | kubectl apply -f -
+${letsencrypt_certificate}
+CERT_EOF
+
+echo "Certificate resource created for Rancher - cert-manager will request certificate from Let's Encrypt"
+echo "Monitor certificate status with: kubectl describe certificate rancher-tls -n cattle-system"
+%{ endif ~}
 
 echo "Rancher installation complete!"
 echo "Access Rancher at: https://${hostname}"

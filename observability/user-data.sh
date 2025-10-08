@@ -127,10 +127,10 @@ helm install cert-manager jetstack/cert-manager \
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
 
 #######################################
-# Configure Let's Encrypt (if enabled)
+# Configure Let's Encrypt ClusterIssuer (if enabled)
 #######################################
 %{ if enable_letsencrypt ~}
-echo "Configuring Let's Encrypt with cert-manager..."
+echo "Configuring Let's Encrypt ClusterIssuer..."
 
 # Create ClusterIssuer for Let's Encrypt
 cat <<'ISSUER_EOF' | kubectl apply -f -
@@ -138,15 +138,6 @@ ${letsencrypt_clusterissuer}
 ISSUER_EOF
 
 echo "Let's Encrypt ClusterIssuers created (staging and production)"
-
-# Create Certificate resource for SUSE Observability (will be created after namespace exists)
-# Note: Certificate will be created after SUSE Observability installation creates the namespace
-cat > /root/letsencrypt-certificate.yaml <<'CERT_EOF'
-${letsencrypt_certificate}
-CERT_EOF
-
-echo "Certificate resource template saved to /root/letsencrypt-certificate.yaml"
-echo "This will be applied after SUSE Observability namespace is created"
 echo "Using environment: ${letsencrypt_environment}"
 %{ endif ~}
 
@@ -210,6 +201,21 @@ spec:
                   number: 8080
 EOF
 kubectl apply -f suse-observability-ingress.yaml
+
+#######################################
+# Create Let's Encrypt Certificate (if enabled)
+#######################################
+%{ if enable_letsencrypt ~}
+echo "Creating Let's Encrypt Certificate for SUSE Observability..."
+
+# Now that suse-observability namespace exists, create the Certificate resource
+cat <<'CERT_EOF' | kubectl apply -f -
+${letsencrypt_certificate}
+CERT_EOF
+
+echo "Certificate resource created - cert-manager will request certificate from Let's Encrypt"
+echo "Monitor certificate status with: kubectl describe certificate observability-tls -n suse-observability"
+%{ endif ~}
 
 #######################################
 # Final Status
