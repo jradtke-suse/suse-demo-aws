@@ -64,7 +64,7 @@ mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
 export KUBECONFIG=/root/.kube/config
-echo << EOF | tee -a /root/.bashrc
+cat << EOF | tee -a /root/.bashrc
 export KUBECONFIG=/root/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
@@ -126,7 +126,9 @@ echo "Let's Encrypt ClusterIssuers created (staging and production)"
 echo "Using environment: ${letsencrypt_environment}"
 %{ endif ~}
 
+#######################################
 # Install Rancher
+#######################################
 helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 helm repo update
 
