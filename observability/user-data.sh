@@ -75,11 +75,13 @@ cat << EOF | tee -a /root/.bashrc
 export KUBECONFIG=/root/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
+set -o vi
 EOF
 cat << EOF | tee -a /home/ec2-user/.bashrc
 export KUBECONFIG=~/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
+set -o vi
 EOF
 
 # Verify K3s installation
@@ -180,10 +182,10 @@ helm upgrade --install \
 
 kubectl get all -n suse-observability
 
-# Need to add check/wait here before proceeding
+# TODO: Need to add check/wait here before proceeding
 
 # temp port forward
-kubectl port-forward service/suse-observability-router 8080:8080 --namespace suse-observability
+# kubectl port-forward service/suse-observability-router 8080:8080 --namespace suse-observability
 
 # Expose App
 cat << EOF | tee suse-observability-ingress.yaml
