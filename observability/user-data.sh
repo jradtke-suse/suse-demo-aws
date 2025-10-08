@@ -54,10 +54,7 @@ helm version
 echo "Installing K3s..."
 
 # Install K3s with specific options for single-node deployment
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \ 
-  --cluster-init \
-  --disable traefik \
-  --write-kubeconfig-mode 644" sh -
+curl -sfL https://get.k3s.io | sh -s - server
 
 # Wait for K3s service to be active
 echo "Waiting for K3s service to be active..."
