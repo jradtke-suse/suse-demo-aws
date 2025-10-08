@@ -71,7 +71,7 @@ alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
 set -o vi
 EOF
 cat << EOF | tee -a /home/ec2-user/.bashrc
-export KUBECONFIG=/root/.kube/config
+export KUBECONFIG=~/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
 set -o vi

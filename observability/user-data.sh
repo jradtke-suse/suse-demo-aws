@@ -76,6 +76,11 @@ export KUBECONFIG=/root/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
 EOF
+cat << EOF | tee -a /home/ec2-user/.bashrc
+export KUBECONFIG=~/.kube/config
+alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
+alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
+EOF
 
 # Verify K3s installation
 # Wait for K3s API server to be responsive
