@@ -10,7 +10,7 @@ echo "Running as: $(whoami)"
 echo "Started at: $(date)"
 
 #######################################
-# SUSE Registration 
+# SUSE Registration and update
 #######################################
 echo "Registering SLES 15 system with SUSE Customer Center..."
 
@@ -46,7 +46,9 @@ install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 # Install Helm
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
+#######################################
 # Install K3s
+#######################################
 curl -sfL https://get.k3s.io | sh -s - server
 # curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --cluster-init" sh -
 

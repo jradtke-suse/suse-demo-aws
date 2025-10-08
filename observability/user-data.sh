@@ -8,7 +8,7 @@ exec 2>&1
 echo "Starting SLES 15 SUSE Observability (StackState) setup..."
 
 #######################################
-# SUSE Registration
+# SUSE Registration and update
 #######################################
 echo "Registering SLES 15 system with SUSE Customer Center..."
 
@@ -52,6 +52,9 @@ helm version
 # Install K3s (Lightweight Kubernetes)
 #######################################
 echo "Installing K3s..."
+
+# TODO: need to incorporate/add syntax to create TLS-SAN for the certs :-(
+#       or... fix the certs post-install?
 
 # Install K3s with specific options for single-node deployment
 curl -sfL https://get.k3s.io | sh -s - server
