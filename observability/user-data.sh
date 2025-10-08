@@ -195,8 +195,14 @@ metadata:
   name: suse-observability-ingress
   namespace: suse-observability
 spec:
+%{ if enable_letsencrypt ~}
+  tls:
+    - hosts:
+        - ${hostname}.${subdomain}.${root_domain}
+      secretName: tls-observability-ingress
+%{ endif ~}
   rules:
-    - host: ${hostname}.${subdomain}.${root_domain} 
+    - host: ${hostname}.${subdomain}.${root_domain}
       http:
         paths:
           - path: /
