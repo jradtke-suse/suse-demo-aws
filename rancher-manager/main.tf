@@ -61,7 +61,7 @@ locals {
   rancher_fqdn = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname_rancher}.${var.subdomain}.${var.root_domain}" : "rancher.${var.environment}.local"
   # Get zone ID and strip /hostedzone/ prefix if present (handles user input like "/hostedzone/Z123" or "Z123")
   raw_zone_id  = var.route53_zone_id != "" ? var.route53_zone_id : (var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? data.aws_route53_zone.main[0].zone_id : "")
-  zone_id      = replace(local.raw_zone_id, "/^\\/hostedzone\\//", "")
+  zone_id      = trimprefix(local.raw_zone_id, "/hostedzone/")
   scc_suse_email = var.suse_email
   scc_regcode = var.suse_regcode
 }
