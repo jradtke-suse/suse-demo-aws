@@ -59,7 +59,7 @@ until systemctl is-active --quiet k3s; do
   sleep 5
 done
 
-# Set up kubeconfig and bash ENV for root
+# Set up kubeconfig and bash ENV for root/ec2-user
 mkdir -p /root/.kube
 cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
 chmod 600 /root/.kube/config
@@ -68,6 +68,13 @@ cat << EOF | tee -a /root/.bashrc
 export KUBECONFIG=/root/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
+set -o vi
+EOF
+cat << EOF | tee -a /home/ec2-user/.bashrc
+export KUBECONFIG=/root/.kube/config
+alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
+alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
+set -o vi
 EOF
 
 # Wait for K3s API server to be responsive
