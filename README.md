@@ -1,6 +1,6 @@
 # SUSE Demo Environment - AWS
 
-This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.
+This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.  This demo will have a cost associated with it.  I will eventually publish some cost estimates (with AWS Calculator output).  My demo also uses SLES.
 
 ## Status
 This is very much a work-in-progress at this time (2025-10-06).  I hope to have the Rancher Manager portion finished up soon (Mid-Oct) and then O11y, then Security.
@@ -9,7 +9,7 @@ This is very much a work-in-progress at this time (2025-10-06).  I hope to have 
 |:--------|:------:|
 | Shared Services | Done | 
 | **SUSE Rancher Manager** | Done |
-| **SUSE Observability** | Work in Progress |
+| **SUSE Observability** | Done (I think) |
 | **SUSE Security** | Not Started |
 
 ## Notes and Caveats 
@@ -26,6 +26,7 @@ This is very much a work-in-progress at this time (2025-10-06).  I hope to have 
 - **SUSE Rancher Manager** - Kubernetes management platform
 - **SUSE Observability** - Monitoring and observability solution
 - **SUSE Security** - Security and compliance tools
+- **Let's Encrypt** - Certificate Vendor
 
 ## Architecture
 
@@ -38,6 +39,7 @@ The demo environment is organized into separate Terraform projects:
 
 ## Prerequisites
 
+- SUSE Customer Center login and registration for SLES Hosts
 - AWS CLI configured with appropriate credentials
 - A Top-Level Domain (TLD) that you own/manage, and ability to modify records with the IAM principal you utilze.
 - Terraform >= 1.5.0
