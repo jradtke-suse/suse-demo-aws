@@ -18,6 +18,7 @@ This is very much a work-in-progress at this time (2025-10-06).  I hope to have 
 * I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain.  This is somewhat unique to my own situation as my top-level domain (kubernerdes.com) is owned/managed by another AWS account.  I have delegated this demo domain using [Route53 Multi-Account Delegation](https://github.com/cloudxabide/route53_multi_account_delegation) which is not an official process, but certainly works.
 * Everything is in a public subnet (NATGW is not needed).
 * While there is a separate directory for each SUSE product, they all rely on the tftstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
+* Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running terraforms commands.  I am not positive this was teh best approach, but it was the best I could create given the other project design considerations I imposed on myself.
 
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 
