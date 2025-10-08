@@ -232,6 +232,7 @@ resource "aws_instance" "rancher" {
     suse_regcode               = var.suse_regcode
     smt_url                    = var.smt_url
     enable_letsencrypt         = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != ""
+    letsencrypt_email          = var.letsencrypt_email
     letsencrypt_environment    = var.letsencrypt_environment
     letsencrypt_clusterissuer  = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != "" ? templatefile("${path.module}/letsencrypt-clusterissuer.yaml.tpl", {
       letsencrypt_email = var.letsencrypt_email

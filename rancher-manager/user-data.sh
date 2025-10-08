@@ -141,6 +141,20 @@ helm repo update
 
 kubectl create namespace cattle-system || true
 
+%{ if enable_letsencrypt ~}
+# Install Rancher with external cert-manager (we manage certificates ourselves)
+helm install rancher rancher-stable/rancher \
+  --namespace cattle-system \
+  --set hostname=${hostname} \
+  --set replicas=1 \
+  --set bootstrapPassword=admin \
+  --set ingress.tls.source=secret \
+  --set privateCA=false \
+  --version ${rancher_version} \
+  --wait \
+  --timeout 15m
+%{ else ~}
+# Install Rancher with default self-signed certificate
 helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
   --set hostname=${hostname} \
@@ -149,6 +163,7 @@ helm install rancher rancher-stable/rancher \
   --version ${rancher_version} \
   --wait \
   --timeout 15m
+%{ endif ~}
 
 # Wait for Rancher to be ready
 echo "Waiting for Rancher deployment to be available..."
