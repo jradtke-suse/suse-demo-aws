@@ -20,7 +20,7 @@ output "rancher_hostname" {
 
 output "route53_record" {
   description = "Route53 DNS record created for Rancher (if enabled)"
-  value       = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname}.${var.subdomain}.${var.root_domain}" : "Not created - Route53 disabled"
+  value       = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "${var.hostname_rancher}.${var.subdomain}.${var.root_domain}" : "Not created - Route53 disabled"
 }
 
 output "security_group_id" {
@@ -35,5 +35,5 @@ output "ssh_command" {
 
 output "rancher_url" {
   description = "URL to access Rancher (may take up to 5 minutes to start"
-  value       = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "https://${var.hostname}.${var.subdomain}.${var.root_domain}" : "https://${var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip}"
+  value       = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? "https://${var.hostname_rancher}.${var.subdomain}.${var.root_domain}" : "https://${var.create_eip ? aws_eip.rancher[0].public_ip : aws_instance.rancher.public_ip}"
 }

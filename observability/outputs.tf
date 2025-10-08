@@ -79,8 +79,8 @@ output "deployment_info" {
   description = "SUSE Observability deployment information"
   value = {
     sizing_profile = "10-nonha"
-    instance_type  = var.instance_type
-    storage_size   = "${var.root_volume_size}GB"
+    instance_type  = var.observability_instance_type
+    storage_size   = "${var.observability_root_volume_size}GB"
     kubernetes     = "K3s (lightweight)"
     namespace      = "suse-observability"
   }
