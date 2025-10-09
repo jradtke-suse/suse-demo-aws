@@ -150,6 +150,13 @@ helm repo update
 cat > /tmp/neuvector-values.yaml <<NVEOF
 controller:
   replicas: 1
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Exists
 
 manager:
   enabled: true
@@ -165,6 +172,21 @@ cve:
 
 enforcer:
   enabled: true
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/control-plane
+      operator: Exists
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Exists
+
+# K3s uses containerd runtime
+k3s:
+  enabled: true
+  runtimePath: /run/k3s/containerd/containerd.sock
+
+crdwebhook:
+  enabled: false
 NVEOF
 
 helm install neuvector neuvector/core \
