@@ -22,7 +22,7 @@ This is very much a work-in-progress at this time (2025 October).
 
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 
-## Products Included
+## Products Included or Utilized
 
 - **SUSE Rancher Manager** - Kubernetes management platform
 - **SUSE Observability** - Monitoring and observability solution
@@ -60,15 +60,17 @@ Deploy projects in the following order to ensure dependencies are met:
 
 ## Quick Start
 
-### 1. Configure Variables
+### 1. Download Repo and Configure Variables
 
 Edit the root `terraform.tfvars` file with your settings:
-
 ```bash
+mkdir -p Developer/Projects; cd $_
+git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
+mv terraform.tfvars.example terraform.tfvars
 vi terraform.tfvars
 ```
 
-Update key values:
+Update key values (examples here):
 - `owner` - Your name/identifier
 - `ssh_public_key` - Your SSH public key
 - `suse_email` and `suse_regcode` - SUSE subscription details
@@ -127,14 +129,10 @@ terraform apply -var-file=../terraform.tfvars
 When running Terraform commands, reference the root configuration file:
 
 ```bash
-mkdir -p Developer/Projects; cd $_
-git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
-mv terraform.tfvars.example terraform.tfvars
 cd shared-services
 terraform init
 terraform plan -var-file=../terraform.tfvars
 terraform apply -var-file=../terraform.tfvars
-cd -
 ```
 
 Apply the same pattern for all modules (rancher-manager, observability, security).
