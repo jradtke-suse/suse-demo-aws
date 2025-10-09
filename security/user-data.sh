@@ -201,7 +201,8 @@ crdwebhook:
 NVEOF
 
 helm install neuvector neuvector/core \
-  --namespace neuvector \
+  --namespace neuvector \ 
+  --set k3s.enabled=true \
   --values /tmp/neuvector-values.yaml \
   --wait
 
