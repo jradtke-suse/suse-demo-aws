@@ -1,91 +1,171 @@
 # SUSE Security
 
-This Terraform project deploys a comprehensive security stack on AWS.
+This Terraform module deploys a comprehensive security stack on AWS, including NeuVector container security, Trivy vulnerability scanning, and Falco runtime security monitoring.
 
 ## Overview
 
 The security stack includes:
-- **NeuVector** - Kubernetes-native container security platform
-- **Trivy** - Vulnerability scanner for containers and other artifacts
-- **Falco** - Runtime security and threat detection
+- **NeuVector** - Kubernetes-native container security platform with network policies, runtime protection, and vulnerability scanning
+- **Trivy** - Comprehensive vulnerability scanner for containers and other artifacts
+- **Falco** - Runtime security and threat detection for suspicious system activity
 
-All components run on a single EC2 instance with SUSE Linux Enterprise Server (SLES) and K3s.
+All components run on a single EC2 instance with SUSE Linux Enterprise Server (SLES) 15 and K3s (lightweight Kubernetes).
 
 ## Prerequisites
 
-- Shared Services infrastructure must be deployed first
-- SSH key pair for instance access (optional but recommended)
+1. **Shared Services infrastructure must be deployed first**
+   ```bash
+   cd ../shared-services
+   terraform apply
+   ```
+
+2. **Unified configuration file** - Use the repository root `terraform.tfvars` file (see Configuration section below)
+
+3. **SSH key pair** (optional but recommended) for instance access
+
+4. **Route53 hosted zone** (optional) - Required for Let's Encrypt TLS certificates
 
 ## Resources Created
 
-- EC2 instance running the security stack
-- Security group for access (ports 8443, 8080)
-- IAM role and instance profile
+- EC2 instance (default: t3.large) running the security stack
+- Security groups:
+  - HTTP/HTTPS (ports 80, 443) for NeuVector web UI via ingress
+  - Trivy server (port 8080)
+  - SSH access via shared-services security group
+- IAM role and instance profile with:
+  - SSM Session Manager support
+  - Route53 permissions for cert-manager (when Let's Encrypt is enabled)
 - Elastic IP (optional, enabled by default)
+- Route53 DNS A record (optional)
+- Kubernetes ingress for NeuVector with TLS support
 
 ## Configuration
 
-1. Copy the example variables file:
+**This module uses the unified configuration approach.** Instead of a local `terraform.tfvars` file:
+
+1. Edit the repository root configuration file:
    ```bash
+   cd ..
    cp terraform.tfvars.example terraform.tfvars
+   vim terraform.tfvars
    ```
 
-2. Edit `terraform.tfvars`:
-   - Set `owner` to your name
-   - Add your SSH public key to `ssh_public_key`
-   - **IMPORTANT:** Update `allowed_cidr_blocks` to your IP address
+2. Update key variables:
+   ```hcl
+   # Global Configuration
+   owner       = "your-name"
+   environment = "suse-demo-aws"
+
+   # Security Configuration
+   allowed_cidr_blocks     = ["YOUR.IP.ADDRESS/32"]  # IMPORTANT: Restrict to your IP!
+   ssh_public_key          = "ssh-rsa AAAA..."        # Your SSH public key
+
+   # Security Instance Configuration
+   security_instance_type    = "t3.large"
+   security_root_volume_size = 100
+
+   # DNS Configuration (optional)
+   create_route53_record = true
+   root_domain           = "example.com"
+   subdomain             = "suse-demo-aws"
+   hostname_security     = "security"
+
+   # Let's Encrypt (optional)
+   enable_letsencrypt      = true
+   letsencrypt_email       = "your-email@example.com"
+   letsencrypt_environment = "staging"  # Use "production" when ready
+
+   # SUSE Registration
+   suse_email   = "your-email@example.com"
+   suse_regcode = "YOUR-SUSE-REGISTRATION-CODE"
+
+   # NeuVector Version
+   neuvector_version = "5.3.4"
+   ```
 
 ## Deployment
 
+Deploy using the unified configuration file from the repository root:
+
 ```bash
+cd security
 terraform init
-terraform plan
-terraform apply
+terraform plan -var-file=../terraform.tfvars
+terraform apply -var-file=../terraform.tfvars
 ```
+
+**Installation time:** ~10-15 minutes for complete setup
 
 ## Accessing Security Tools
 
-After deployment (wait ~10-15 minutes for installation to complete):
+After deployment, wait ~10-15 minutes for the installation to complete.
+
+### Get Access URLs
+```bash
+terraform output neuvector_url  # NeuVector web UI
+terraform output trivy_url      # Trivy server endpoint
+terraform output ssh_command    # SSH access command
+```
 
 ### NeuVector (Container Security)
-```bash
-terraform output neuvector_url
-```
-- Default credentials: `admin` / `admin`
-- Change password on first login
-- Features:
-  - Container vulnerability scanning
-  - Network security policies
-  - Runtime protection
-  - Compliance reporting
+
+**Access NeuVector UI:**
+- With Route53/Let's Encrypt: `https://security.suse-demo-aws.example.com`
+- Without DNS: Use the output from `terraform output neuvector_url`
+
+**Default credentials:** `admin` / `admin`
+**⚠️ IMPORTANT:** Change the password immediately on first login!
+
+**Key Features:**
+- Container vulnerability scanning and CVE tracking
+- Network segmentation and security policies
+- Runtime protection (discover, monitor, protect modes)
+- Compliance reporting (PCI-DSS, NIST, CIS benchmarks)
+- Admission control for Kubernetes
 
 ### Trivy (Vulnerability Scanner)
+
+Trivy runs as a server on port 8080 for centralized vulnerability scanning.
+
+**Scan container images from your local machine:**
 ```bash
-terraform output trivy_url
+# Get Trivy server URL
+TRIVY_SERVER=$(terraform output -raw trivy_url)
+
+# Scan an image
+trivy image --server $TRIVY_SERVER nginx:latest
+trivy image --server $TRIVY_SERVER --severity HIGH,CRITICAL myapp:v1.0
 ```
 
-Scan container images:
+**Scan from the instance (SSH in first):**
 ```bash
-# From your local machine (replace IP with output)
-trivy image --server http://IP:8080 nginx:latest
-
-# From the instance
-ssh to instance
 trivy image nginx:latest
+trivy fs /path/to/project
+trivy k8s --report summary
 ```
 
 ### Falco (Runtime Security)
 
-Falco runs as a systemd service and monitors system calls for suspicious activity.
+Falco runs as a systemd service and monitors kernel system calls for suspicious activity and security threats.
 
-View Falco alerts:
+**View Falco alerts in real-time:**
 ```bash
 # SSH to instance
-terraform output ssh_command
+$(terraform output -raw ssh_command)
 
-# View Falco logs
+# View live Falco alerts
 sudo journalctl -u falco -f
+
+# View recent alerts
+sudo journalctl -u falco -n 100
 ```
+
+**Common Falco detections:**
+- Shell execution in containers
+- Privilege escalation attempts
+- Sensitive file access
+- Unexpected network connections
+- Process behavior anomalies
 
 ## Using NeuVector
 
@@ -125,33 +205,69 @@ trivy fs /path/to/project
 trivy k8s --report summary
 ```
 
-## Integration with Rancher
+## Let's Encrypt TLS Certificates
 
-To integrate with Rancher Manager:
+When `enable_letsencrypt = true` and Route53 DNS is configured:
 
-1. In Rancher, go to Cluster Management
-2. Select your cluster
-3. Go to Apps → Charts
-4. Install NeuVector from Rancher chart repository
-5. Configure to use this instance as the central manager
+**Monitor certificate issuance:**
+```bash
+# SSH to instance
+$(terraform output -raw ssh_command)
+
+# Check certificate status
+kubectl get certificate -n neuvector
+kubectl describe certificate security-tls -n neuvector
+
+# View cert-manager logs
+kubectl logs -n cert-manager -l app=cert-manager -f
+```
+
+**Certificate environments:**
+- **Staging:** Use for testing. Issues fake certificates with high rate limits. Perfect for initial setup.
+- **Production:** Issues real, trusted certificates. Has strict rate limits (50 certs/week per domain).
+
+**Switching from staging to production:**
+1. Update `letsencrypt_environment = "production"` in `terraform.tfvars`
+2. Run `terraform apply -var-file=../terraform.tfvars`
+3. Wait for cert-manager to issue new certificate (~2-5 minutes)
+
+## Integration with Rancher Manager
+
+Deploy NeuVector agents to Rancher-managed clusters:
+
+1. Access Rancher Manager UI
+2. Navigate to **Cluster Management** → Select target cluster
+3. Go to **Apps** → **Charts** → Search "NeuVector"
+4. Install NeuVector with these settings:
+   - Manager: Point to this standalone NeuVector instance
+   - Controller: Deploy on target cluster
+   - Enforcer: Deploy on target cluster
+
+This allows centralized security management across multiple Kubernetes clusters.
 
 ## Monitoring Installation
 
-SSH into the instance:
-
+**Check deployment status:**
 ```bash
-# Get SSH command
-terraform output ssh_command
+# Get SSH command and connect
+$(terraform output -raw ssh_command)
 
-# Check K3s
-sudo kubectl get nodes
-sudo kubectl get pods -n neuvector
+# Verify K3s cluster
+kubectl get nodes
+kubectl get pods -A
 
-# Check services
+# Check NeuVector deployment
+kubectl get pods -n neuvector
+kubectl get ingress -n neuvector
+kubectl get certificate -n neuvector  # If Let's Encrypt enabled
+
+# Check system services
+sudo systemctl status k3s
 sudo systemctl status trivy-server
 sudo systemctl status falco
 
 # View installation logs
+sudo tail -f /var/log/user-data.log
 sudo journalctl -u cloud-init-output -f
 ```
 
@@ -171,10 +287,81 @@ sudo journalctl -u cloud-init-output -f
 
 ## Troubleshooting
 
-If services are not accessible:
-1. Check instance is running: `aws ec2 describe-instances`
-2. SSH to instance and check logs: `sudo journalctl -u cloud-init-output`
-3. Verify K3s is running: `sudo kubectl get nodes`
-4. Check NeuVector pods: `sudo kubectl get pods -n neuvector`
-5. Verify services: `sudo systemctl status trivy-server falco`
-6. Check security group allows your IP address
+### NeuVector UI not accessible
+
+1. **Check instance status:**
+   ```bash
+   aws ec2 describe-instances --filters "Name=tag:Name,Values=*suse-security*" --query "Reservations[].Instances[].[InstanceId,State.Name,PublicIpAddress]"
+   ```
+
+2. **Verify security groups allow your IP:**
+   ```bash
+   # Check your current IP
+   curl ifconfig.me
+
+   # Update allowed_cidr_blocks in terraform.tfvars if needed
+   ```
+
+3. **Check NeuVector deployment:**
+   ```bash
+   # SSH to instance
+   $(terraform output -raw ssh_command)
+
+   # Check pods
+   kubectl get pods -n neuvector
+   kubectl describe pods -n neuvector
+
+   # Check ingress
+   kubectl get ingress -n neuvector
+   kubectl describe ingress neuvector-ingress -n neuvector
+   ```
+
+4. **Check K3s and ingress controller:**
+   ```bash
+   # Verify K3s is running
+   sudo systemctl status k3s
+   kubectl get nodes
+
+   # Check Traefik ingress controller (built into K3s)
+   kubectl get pods -n kube-system -l app.kubernetes.io/name=traefik
+   ```
+
+### Let's Encrypt certificate issues
+
+1. **Check certificate status:**
+   ```bash
+   kubectl get certificate -n neuvector
+   kubectl describe certificate security-tls -n neuvector
+   ```
+
+2. **Common certificate issues:**
+   - **Pending state:** DNS propagation or Route53 permissions issue
+   - **Failed state:** Check cert-manager logs
+   ```bash
+   kubectl logs -n cert-manager -l app=cert-manager --tail=100
+   ```
+
+3. **Verify Route53 permissions:**
+   ```bash
+   # Check IAM role has Route53 permissions
+   aws iam get-role-policy --role-name $(terraform output -raw instance_id | xargs aws ec2 describe-instances --instance-ids {} --query "Reservations[].Instances[].IamInstanceProfile.Arn" --output text | cut -d'/' -f2)
+   ```
+
+### Installation logs
+
+**View complete installation logs:**
+```bash
+$(terraform output -raw ssh_command)
+sudo tail -f /var/log/user-data.log
+sudo journalctl -u cloud-init-output
+```
+
+### Common issues
+
+| Issue | Solution |
+|-------|----------|
+| NeuVector UI shows 502/503 error | Wait for pods to be ready: `kubectl wait --for=condition=ready pod -l app=neuvector-manager-pod -n neuvector --timeout=600s` |
+| Certificate stuck in pending | Check DNS: `dig security.suse-demo-aws.example.com` and cert-manager logs |
+| Can't SSH to instance | Verify security group allows your IP and SSH key is correct |
+| Trivy server not responding | Check service: `sudo systemctl status trivy-server` and restart if needed |
+| Falco not logging | Check kernel headers: `sudo zypper install -t pattern devel_kernel` |
