@@ -263,9 +263,11 @@ curl -s -o /etc/zypp/repos.d/falcosecurity.repo https://falco.org/repo/falcosecu
 zypper refresh
 zypper install -y falco
 
-# Start Falco
-systemctl enable falco
-systemctl start falco
+# Start Falco (service may already be enabled by package installation)
+systemctl daemon-reload
+systemctl enable falco 2>/dev/null || echo "Falco service already enabled or is an alias"
+systemctl start falco || echo "Falco service may already be running"
+systemctl status falco --no-pager || true
 
 #######################################
 # Final Status
