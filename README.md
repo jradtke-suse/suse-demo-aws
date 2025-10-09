@@ -145,9 +145,11 @@ To destroy all resources, run `terraform destroy` in reverse order:
 
 **Important:** Destroy in reverse order to respect state dependencies. You must type "yes" and hit enter for each module.
 
+Also, if you do not see/recognize the risk in the following commands, I'd probably just run them manually ;-)  (hint: you shouldn't *really* echo "yes" to a command, let alone a command with "dstroy" in it.  - you've been warned)
+
 ```bash
-cd security && terraform destroy -var-file=../terraform.tfvars && cd ..
-cd observability && terraform destroy -var-file=../terraform.tfvars && cd ..
-cd rancher-manager && terraform destroy -var-file=../terraform.tfvars && cd ..
-cd shared-services && terraform destroy -var-file=../terraform.tfvars && cd ..
+cd security && echo "yes" | terraform destroy -var-file=../terraform.tfvars; cd ..
+cd observability && echo "yes" | terraform destroy -var-file=../terraform.tfvars; cd ..
+cd rancher-manager && echo "yes" | terraform destroy -var-file=../terraform.tfvars;  cd ..
+cd shared-services && echo "yes" | terraform destroy -var-file=../terraform.tfvars; cd ..
 ```
