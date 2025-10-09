@@ -74,7 +74,8 @@ create_eip = true
 create_route53_record = true 
 root_domain           = "kubernerdes.com"
 subdomain             = "suse-demo-aws"
-route53_zone_id       = ""  # Leave empty to auto-discover
+route53_zone_id       = ""  # Leave empty to auto-discover 
+                            # either format: /hostedzone/Z00000000001 or Z00000000001 should be acceptable
 # To find your Route53 zone ID:
 # aws route53 list-hosted-zones-by-name --dns-name suse-demo-aws.kubernerdes.com --query "HostedZones[].Id" --output text
 
