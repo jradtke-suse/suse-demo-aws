@@ -148,6 +148,11 @@ helm repo update
 
 # Create NeuVector values file
 cat > /tmp/neuvector-values.yaml <<NVEOF
+# Global runtime configuration for K3s containerd
+k3s:
+  enabled: true
+  runtimePath: /run/k3s/containerd/containerd.sock
+
 controller:
   replicas: 1
   tolerations:
@@ -180,11 +185,17 @@ enforcer:
       key: node-role.kubernetes.io/master
       operator: Exists
 
-# K3s uses containerd runtime
-k3s:
-  enabled: true
-  runtimePath: /run/k3s/containerd/containerd.sock
+# Disable other runtimes
+docker:
+  enabled: false
 
+containerd:
+  enabled: false
+
+crio:
+  enabled: false
+
+# Disable CRD webhook for single-node setup
 crdwebhook:
   enabled: false
 NVEOF
