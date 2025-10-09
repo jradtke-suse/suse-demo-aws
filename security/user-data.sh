@@ -170,7 +170,6 @@ NVEOF
 helm install neuvector neuvector/core \
   --namespace neuvector \
   --values /tmp/neuvector-values.yaml \
-  --version ${neuvector_version} \
   --wait
 
 # Wait for NeuVector to be ready

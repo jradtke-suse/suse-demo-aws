@@ -197,9 +197,9 @@ variable "cert_manager_version" {
 }
 
 variable "neuvector_version" {
-  description = "NeuVector version to install"
+  description = "NeuVector app version to install (Helm will use latest compatible chart version)"
   type        = string
-  default     = "5.3.4"
+  default     = "5.4.6"
 }
 
 # SUSE Observability Configuration

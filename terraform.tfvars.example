@@ -123,7 +123,7 @@ suse_observability_admin_password = ""  # Leave empty to auto-generate
 # -----------------------------------------------------------------------------
 # SUSE Security (NeuVector) Configuration
 # -----------------------------------------------------------------------------
-neuvector_version = "5.3.4"
+neuvector_version = "5.4.6"  # Latest stable version
 
 # -----------------------------------------------------------------------------
 # Optional: AMI Override (all modules)
