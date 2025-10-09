@@ -69,6 +69,7 @@ mkdir -p Developer/Projects; cd $_
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
 cp terraform.tfvars.example terraform.tfvars
 vi terraform.tfvars
+alias doeet="terraform init; terraform plan -var-file=../terraform.tfvars; terraform apply -var-file=../terraform.tfvar"
 ```
 
 Update key values (examples here):
