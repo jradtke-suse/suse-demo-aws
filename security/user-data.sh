@@ -200,8 +200,10 @@ crdwebhook:
   enabled: false
 NVEOF
 
+
+echo "Let's install Neuvector using Helm"
 helm install neuvector neuvector/core \
-  --namespace neuvector \ 
+  --namespace neuvector \
   --set k3s.enabled=true \
   --values /tmp/neuvector-values.yaml \
   --wait
