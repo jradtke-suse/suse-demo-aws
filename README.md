@@ -66,7 +66,7 @@ Edit the root `terraform.tfvars` file with your settings:
 ```bash
 mkdir -p Developer/Projects; cd $_
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
-mv terraform.tfvars.example terraform.tfvars
+cp terraform.tfvars.example terraform.tfvars
 vi terraform.tfvars
 ```
 
