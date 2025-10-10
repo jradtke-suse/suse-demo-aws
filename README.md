@@ -155,3 +155,11 @@ cd observability && echo "yes" | terraform destroy -var-file=../terraform.tfvars
 cd rancher-manager && echo "yes" | terraform destroy -var-file=../terraform.tfvars;  cd ..
 cd shared-services && echo "yes" | terraform destroy -var-file=../terraform.tfvars; cd ..
 ```
+
+## Cost Estimates
+
+This section is a work-in-progress and I will update as I learn more.  
+You can *always* utilize: [AWS Calculator](https://calculator.aws/) or [Vantage](https://instances.vantage.sh/) 
+
+![My Cost Estimate](Images/cost-estimate-spreadsheet-10-09.png)
+
