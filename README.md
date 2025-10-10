@@ -65,7 +65,9 @@ Deploy projects in the following order to ensure dependencies are met:
 
 Edit the root `terraform.tfvars` file with your settings:
 ```bash
-mkdir -p Developer/Projects; cd $_
+mkdir -p ~/Developer/Projects; cd $_
+# Archive existing demo directory
+[ -d "suse-demo-aws" ] && { i=1; while [ -d "suse-demo-aws-$(printf '%02d' $i)" ]; do ((i++)); done; mv suse-demo-aws "suse-demo-aws-$(printf '%02d' $i)"; }
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
 cp terraform.tfvars.example terraform.tfvars
 vi terraform.tfvars
