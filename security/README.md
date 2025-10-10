@@ -80,7 +80,7 @@ All components run on a single EC2 instance with SUSE Linux Enterprise Server (S
    suse_regcode = "YOUR-SUSE-REGISTRATION-CODE"
 
    # NeuVector Version
-   neuvector_version = "5.3.4"
+   neuvector_version = "5.4.6"  # Latest stable version
    ```
 
 ## Deployment
