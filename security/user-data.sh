@@ -35,6 +35,14 @@ zypper refresh
 zypper update -y
 
 #######################################
+# Disable Docker (need to confirm this is necessary)
+#######################################
+systemctl disable docker.service --now
+systemctl disable docker.socket --now
+# If docker is running during the remainder of the install, it causes issues
+# namely, the enforcer-pod pulls a docker-specific image
+
+#######################################
 # Install required packages
 #######################################
 zypper install -y curl wget git-core
