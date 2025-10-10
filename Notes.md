@@ -2,7 +2,18 @@
 
 A place for random notes about this project.
 
-AMI for SLES
+## Service and Product Links
+
+[SUSE Rancher Manager](https://rancher.suse-demo-aws.kubernerdes.com/)
+
+[SUSE Observability](https://observability.suse-demo-aws.kubernerdes.com)
+
+[SUSE Security](https://security.suse-demo-aws.kubernerdes.com)
+
+[SUSE MLM](https://mlm.suse-demo-aws.kubernerdes.com) [future]
+
+
+## AMI for SLES
 I opted to have IaC that would allow to simply "pull the latest" image, essentially with no guardrails or guidance.  This ended up with the SLES 15sp7 image, optimized for K8s.  Which seems like it would be fine.  (and, for the most part it is).  
 
 Issues: 
@@ -20,3 +31,4 @@ If you need/want to select a specific AMI, this will help you search
 
 or, look here  
 https://pint.suse.com/?resource=images&state=active&csp=amazon
+
