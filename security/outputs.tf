@@ -14,7 +14,7 @@ output "kubectl_commands" {
     ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo tail -f /var/log/user-data.log"
 
     # Acquire Default Login/Password
-    ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "kubectl get secret --namespace neuvector neuvector-bootstrap-secret -o go-template='{{ .data.bootstrapPassword|base64decode}}{{ "\n" }}'"
+    ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "/usr/local/bin/kubectl get secret --namespace neuvector neuvector-bootstrap-secret -o go-template='{{ .data.bootstrapPassword|base64decode}}{{ \"\n\" }}'"
   EOT
 }
 
