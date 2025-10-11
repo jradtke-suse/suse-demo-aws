@@ -1,27 +1,20 @@
 # SUSE Demo Environment - AWS
 
-This repository contains Terraform projects to deploy a complete SUSE product demo environment in AWS.  This demo will have a cost associated with it.  I will eventually publish some cost estimates (with AWS Calculator output).  My demo also uses SLES.
+## Purpose
+This repository contains Terraform projects to deploy a SUSE demo environment with a number of products running in AWS.  The terraform code here will deploy the core product with fundamental configuration needed.  After that, the demo requires some interactive updates via the WebUI or Kubernetes API.
+
+This demo will have a cost associated with it - as it runs in AWS and I have opted to use SLES.  
+I  have published some cost estimates (with AWS Calculator output).  
 
 ## Status
-This is very much a work-in-progress at this time (2025 October).  
+This is very much still a work-in-progress at this time (2025 October) but overall should be functional.  
 
-| Project | Status |
-|:--------|:------:|
-| Shared Services | Done | 
-| **SUSE Rancher Manager** | Done |
-| **SUSE Observability** | Done (I think) |
-| **SUSE Security** | Not Started |
-
-## Notes and Caveats 
-
-* This is NOT completely automated.  You will need to roll with some click-ops, etc.. to connect the different products (i.e. add Rancher Manager to the Observability platform using kubectl/helm).  This is intentional to allow some insight in to how these independent products work together.
-* I have intentionally left some of my own (opinionated) values in some of the variables - specifically my own domain_name.  I feel it makes it easier to understand how the variable values are used.  You MUST, however, update with your own values.
-* I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain.  This is somewhat unique to my own situation as my top-level domain (kubernerdes.com) is owned/managed by another AWS account.  I have delegated this demo domain using [Route53 Multi-Account Delegation](https://github.com/cloudxabide/route53_multi_account_delegation) which is not an official process, but certainly works.
-* Everything is in a public subnet (NATGW is not needed).
-* While there is a separate directory for each SUSE product, they all rely on the tftstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
-* Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running terraforms commands.  I am not positive this was teh best approach, but it was the best I could create given the other project design considerations I imposed on myself.
-
-**NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
+| Project                  | Status |
+|:-------------------------|:------:|
+| Shared Services          | Done   | 
+| **SUSE Rancher Manager** | Done   |
+| **SUSE Observability**   | Done   |
+| **SUSE Security**        | Done (I think) | 
 
 ## Products Included or Utilized
 
@@ -49,6 +42,17 @@ The demo environment is organized into separate Terraform projects:
 During the deployment you will need to obtain or create
 - SSH key pair for EC2 instances
 - HostedZoneId for your TLD
+
+## Notes and Caveats
+
+* This is NOT completely automated.  You will need to roll with some click-ops, etc.. to connect the different products (i.e. add Rancher Manager to the Observability platform using kubectl/helm).  This is intentional to allow some insight in to how these independent products work together.
+* I have intentionally left some of my own (opinionated) values in some of the variables - specifically my own domain_name.  I feel it makes it easier to understand how the variable values are used.  You MUST, however, update with your own values.
+* I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain.  This is somewhat unique to my own situation as my top-level domain (kubernerdes.com) is owned/managed by another AWS account.  I have delegated this demo domain using [Route53 Multi-Account Delegation](https://github.com/cloudxabide/route53_multi_account_delegation) which is not an official process, but certainly works.
+* Everything is in a public subnet (NATGW is not needed).
+* While there is a separate directory for each SUSE product, they all rely on the tftstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
+* Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running terraforms commands.  I am not positive this was teh best approach, but it was the best I could create given the other project design considerations I imposed on myself.
+
+**NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 
 ## Deployment Order
 
