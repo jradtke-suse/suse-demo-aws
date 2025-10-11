@@ -3,7 +3,6 @@
 This is simply the commands, with no explanation
 
 ```
-
 mkdir -p ~/Developer/Projects; cd $_
 # Archive existing demo directory, and create new
 [ -d "suse-demo-aws" ] && { i=1; while [ -d "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)" ]; do ((i++)); done; mv suse-demo-aws "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)"; }
