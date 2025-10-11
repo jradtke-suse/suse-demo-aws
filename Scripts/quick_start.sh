@@ -155,9 +155,9 @@ stop() {
     fi
 
     # Destroy in REVERSE order (critical for state dependencies)
-    local reversed_projects=($(printf '%s\n' "${PROJECTS[@]}" | tac))
-
-    for PROJECT in "${reversed_projects[@]}"; do
+    # Iterate through array indices backwards (portable - works on macOS and Linux)
+    for (( idx=${#PROJECTS[@]}-1 ; idx>=0 ; idx-- )); do
+        PROJECT="${PROJECTS[idx]}"
         print_msg "${YELLOW}" "Destroying: ${PROJECT}"
 
         cd "${PROJECT}" || exit 1
