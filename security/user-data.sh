@@ -237,8 +237,8 @@ metadata:
   name: neuvector-ingress
   namespace: neuvector
   annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
 %{ if enable_letsencrypt ~}
   tls:
