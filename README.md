@@ -14,7 +14,7 @@ This is very much still a work-in-progress at this time (2025 October) but overa
 | Shared Services          | Done   | 
 | **SUSE Rancher Manager** | Done   |
 | **SUSE Observability**   | Done   |
-| **SUSE Security**        | Done (I think) | 
+| **SUSE Security**        | Done (mostly) | 
 
 ## Products Included or Utilized
 
