@@ -179,6 +179,44 @@ stop() {
 }
 
 #######################################
+# Output: Display terraform outputs from all projects
+#######################################
+output() {
+    print_header "Terraform Outputs from All Projects"
+
+    # Verify we're in the correct directory
+    if [ ! -d "shared-services" ]; then
+        print_msg "${RED}" "ERROR: Must be run from the suse-demo-aws repository root"
+        print_msg "${YELLOW}" "Current directory: $(pwd)"
+        exit 1
+    fi
+
+    # Display outputs for each project in deployment order
+    for PROJECT in "${PROJECTS[@]}"; do
+        echo
+        print_msg "${BLUE}" "Output from: ${PROJECT}"
+        print_msg "${BLUE}" "----------------------------------------"
+
+        if [ ! -d "${PROJECT}" ]; then
+            print_msg "${YELLOW}" "WARNING: Project directory ${PROJECT} not found"
+            continue
+        fi
+
+        cd "${PROJECT}" || exit 1
+
+        if [ ! -f "terraform.tfstate" ]; then
+            print_msg "${YELLOW}" "No terraform state found - project may not be deployed"
+        else
+            terraform output || print_msg "${YELLOW}" "No outputs available for ${PROJECT}"
+        fi
+
+        cd - > /dev/null || exit 1
+    done
+
+    print_header "Output Display Complete!"
+}
+
+#######################################
 # Display help information
 #######################################
 help() {
@@ -200,6 +238,10 @@ OPTIONS:
                 - Destroys in reverse order: security, observability, rancher-manager, shared-services
                 - Prompts for confirmation before proceeding
                 - CRITICAL: Respects Terraform state dependencies
+
+    output      Display terraform outputs from all deployed projects
+                - Shows outputs in deployment order
+                - Useful for retrieving URLs, IPs, and other deployment information
 
     help        Display this help message
 
@@ -226,6 +268,9 @@ PREREQUISITES:
 EXAMPLES:
     # Deploy infrastructure
     $(basename "$0") start
+
+    # Display terraform outputs
+    $(basename "$0") output
 
     # Destroy infrastructure
     $(basename "$0") stop
@@ -254,6 +299,9 @@ main() {
             ;;
         stop)
             stop
+            ;;
+        output)
+            output
             ;;
         help|--help|-h)
             help
