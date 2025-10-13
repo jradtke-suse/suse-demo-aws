@@ -300,18 +300,24 @@ getkube() {
             print_msg "${GREEN}" "✓ Successfully retrieved kubeconfig for ${PROJECT}"
 
             # Update the server address in kubeconfig to use the public IP
-            if command -v sed &> /dev/null; then
-                # Replace localhost/127.0.0.1 with actual host IP in the kubeconfig
-                if [[ "$OSTYPE" == "darwin"* ]]; then
-                    # macOS sed syntax
-                    sed -i '' "s/127.0.0.1:6443/${ssh_host}:6443/g" "$output_file"
-                    sed -i '' "s/localhost:6443/${ssh_host}:6443/g" "$output_file"
+            if [ -f "$output_file" ]; then
+                if command -v sed &> /dev/null; then
+                    # Replace localhost/127.0.0.1 with actual host IP in the kubeconfig
+                    if [[ "$OSTYPE" == "darwin"* ]]; then
+                        # macOS sed syntax
+                        sed -i '' "s|127\.0\.0\.1:6443|${ssh_host}:6443|g" "$output_file"
+                        sed -i '' "s|localhost:6443|${ssh_host}:6443|g" "$output_file"
+                    else
+                        # Linux sed syntax
+                        sed -i "s|127\.0\.0\.1:6443|${ssh_host}:6443|g" "$output_file"
+                        sed -i "s|localhost:6443|${ssh_host}:6443|g" "$output_file"
+                    fi
+                    print_msg "${GREEN}" "✓ Updated server address to use public IP"
                 else
-                    # Linux sed syntax
-                    sed -i "s/127.0.0.1:6443/${ssh_host}:6443/g" "$output_file"
-                    sed -i "s/localhost:6443/${ssh_host}:6443/g" "$output_file"
+                    print_msg "${YELLOW}" "⚠ sed not found - kubeconfig server address not updated"
                 fi
-                print_msg "${GREEN}" "✓ Updated server address to use public IP"
+            else
+                print_msg "${YELLOW}" "⚠ Kubeconfig file not found after copy: ${output_file}"
             fi
         else
             print_msg "${RED}" "✗ Failed to retrieve kubeconfig for ${PROJECT}"
