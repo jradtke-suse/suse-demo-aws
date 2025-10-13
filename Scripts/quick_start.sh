@@ -220,6 +220,131 @@ output() {
 }
 
 #######################################
+# Get kubeconfig: Retrieve kubeconfig files from all deployed K8s clusters
+#######################################
+getkube() {
+    print_header "Retrieving Kubeconfig Files"
+
+    # Navigate to repository root (parent directory of Scripts)
+    cd "$(dirname "$0")/.." || exit 1
+
+    # Verify we're in the correct directory
+    if [ ! -d "shared-services" ]; then
+        print_msg "${RED}" "ERROR: Cannot find project directories"
+        print_msg "${YELLOW}" "Current directory: $(pwd)"
+        exit 1
+    fi
+
+    # Create .kube directory if it doesn't exist
+    mkdir -p .kube
+
+    # Projects with Kubernetes clusters (excluding shared-services)
+    local k8s_projects=("rancher-manager" "observability" "security")
+
+    for PROJECT in "${k8s_projects[@]}"; do
+        echo
+        print_msg "${BLUE}" "Retrieving kubeconfig from: ${PROJECT}"
+        print_msg "${BLUE}" "----------------------------------------"
+
+        if [ ! -d "${PROJECT}" ]; then
+            print_msg "${YELLOW}" "WARNING: Project directory ${PROJECT} not found"
+            continue
+        fi
+
+        cd "${PROJECT}" || exit 1
+
+        if [ ! -f "terraform.tfstate" ]; then
+            print_msg "${YELLOW}" "No terraform state found - ${PROJECT} may not be deployed"
+            cd - > /dev/null || exit 1
+            continue
+        fi
+
+        # Get ssh_command output which contains the IP address
+        local ssh_cmd
+        ssh_cmd=$(terraform output -raw ssh_command 2>/dev/null)
+
+        if [ -z "$ssh_cmd" ] || [ "$ssh_cmd" = "Use AWS Systems Manager Session Manager to connect" ]; then
+            print_msg "${YELLOW}" "WARNING: No SSH access configured for ${PROJECT}"
+            print_msg "${YELLOW}" "Cannot retrieve kubeconfig without SSH key"
+            cd - > /dev/null || exit 1
+            continue
+        fi
+
+        # Extract SSH key path and host from ssh_command
+        # Expected format: "ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@<IP>"
+        local ssh_key
+        local ssh_host
+        ssh_key=$(echo "$ssh_cmd" | grep -o '\-i [^ ]*' | cut -d' ' -f2)
+        ssh_host=$(echo "$ssh_cmd" | grep -o 'ec2-user@[^ ]*' | cut -d'@' -f2)
+
+        if [ -z "$ssh_key" ] || [ -z "$ssh_host" ]; then
+            print_msg "${RED}" "ERROR: Could not parse SSH command for ${PROJECT}"
+            print_msg "${YELLOW}" "SSH Command: ${ssh_cmd}"
+            cd - > /dev/null || exit 1
+            continue
+        fi
+
+        # Expand tilde in SSH key path
+        ssh_key="${ssh_key/#\~/$HOME}"
+
+        print_msg "${GREEN}" "SSH Key: ${ssh_key}"
+        print_msg "${GREEN}" "Host: ${ssh_host}"
+
+        # Use scp to retrieve kubeconfig
+        local output_file="../.kube/${PROJECT}.kubeconfig"
+
+        print_msg "${BLUE}" "Copying kubeconfig to: .kube/${PROJECT}.kubeconfig"
+
+        if scp -i "$ssh_key" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            "ec2-user@${ssh_host}:/home/ec2-user/.kube/config" "$output_file" 2>/dev/null; then
+            print_msg "${GREEN}" "✓ Successfully retrieved kubeconfig for ${PROJECT}"
+
+            # Update the server address in kubeconfig to use the public IP
+            if command -v sed &> /dev/null; then
+                # Replace localhost/127.0.0.1 with actual host IP in the kubeconfig
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    # macOS sed syntax
+                    sed -i '' "s/127.0.0.1:6443/${ssh_host}:6443/g" "$output_file"
+                    sed -i '' "s/localhost:6443/${ssh_host}:6443/g" "$output_file"
+                else
+                    # Linux sed syntax
+                    sed -i "s/127.0.0.1:6443/${ssh_host}:6443/g" "$output_file"
+                    sed -i "s/localhost:6443/${ssh_host}:6443/g" "$output_file"
+                fi
+                print_msg "${GREEN}" "✓ Updated server address to use public IP"
+            fi
+        else
+            print_msg "${RED}" "✗ Failed to retrieve kubeconfig for ${PROJECT}"
+            print_msg "${YELLOW}" "Make sure the instance is running and accessible via SSH"
+        fi
+
+        cd - > /dev/null || exit 1
+    done
+
+    echo
+    print_header "Kubeconfig Retrieval Complete!"
+
+    # Display usage instructions
+    echo
+    print_msg "${GREEN}" "Retrieved kubeconfig files:"
+    for PROJECT in "${k8s_projects[@]}"; do
+        if [ -f ".kube/${PROJECT}.kubeconfig" ]; then
+            echo "  - .kube/${PROJECT}.kubeconfig"
+        fi
+    done
+
+    echo
+    print_msg "${YELLOW}" "Usage examples:"
+    echo "  # Use with kubectl"
+    echo "  export KUBECONFIG=\$(pwd)/.kube/rancher-manager.kubeconfig"
+    echo "  kubectl get nodes"
+    echo
+    echo "  # Or specify directly"
+    echo "  kubectl --kubeconfig=.kube/observability.kubeconfig get pods -A"
+    echo
+}
+
+#######################################
 # Display help information
 #######################################
 help() {
@@ -245,6 +370,11 @@ OPTIONS:
     output      Display terraform outputs from all deployed projects
                 - Shows outputs in deployment order
                 - Useful for retrieving URLs, IPs, and other deployment information
+
+    getkube     Retrieve kubeconfig files from all deployed K8s clusters
+                - Copies kubeconfig from each project to .kube/<project>.kubeconfig
+                - Updates server addresses to use public IPs
+                - Retrieves from: rancher-manager, observability, security
 
     help        Display this help message
 
@@ -274,6 +404,9 @@ EXAMPLES:
 
     # Display terraform outputs
     $(basename "$0") output
+
+    # Retrieve kubeconfig files
+    $(basename "$0") getkube
 
     # Destroy infrastructure
     $(basename "$0") stop
@@ -305,6 +438,9 @@ main() {
             ;;
         output)
             output
+            ;;
+        getkube)
+            getkube
             ;;
         help|--help|-h)
             help

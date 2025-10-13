@@ -17,6 +17,9 @@ override.tf.json
 *.key
 id_rsa*
 
+# Kubeconfig files
+.kube/
+
 # OS files
 .DS_Store
 Thumbs.db
