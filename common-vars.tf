@@ -74,6 +74,14 @@ variable "ssh_public_key" {
   description = "SSH public key for instance access (shared across all instances)"
   type        = string
   default     = ""
+
+  validation {
+    condition = (
+      var.ssh_public_key == "" ||
+      can(regex("^(ssh-rsa|ssh-ed25519|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521) ", var.ssh_public_key))
+    )
+    error_message = "The ssh_public_key must be a valid SSH public key starting with ssh-rsa, ssh-ed25519, or ecdsa-sha2-*."
+  }
 }
 
 # Instance Configuration - Module Specific
@@ -169,6 +177,14 @@ variable "suse_email" {
   description = "SUSE Email Address used to register to SCC"
   type        = string
   default     = ""
+
+  validation {
+    condition = (
+      var.suse_email == "" ||
+      can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.suse_email))
+    )
+    error_message = "The suse_email must be a valid email address."
+  }
 }
 
 variable "suse_regcode" {
@@ -241,6 +257,14 @@ variable "letsencrypt_email" {
   description = "Email address for Let's Encrypt certificate notifications"
   type        = string
   default     = ""
+
+  validation {
+    condition = (
+      var.letsencrypt_email == "" ||
+      can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.letsencrypt_email))
+    )
+    error_message = "The letsencrypt_email must be a valid email address when provided."
+  }
 }
 
 variable "letsencrypt_environment" {
