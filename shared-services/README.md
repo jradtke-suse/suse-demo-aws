@@ -5,9 +5,8 @@ This Terraform project creates the common infrastructure needed for all SUSE dem
 ## Resources Created
 
 - **VPC** - Isolated virtual network
-- **Subnets** - Public and private subnets across multiple availability zones
-- **Internet Gateway** - Provides internet access to public subnets
-- **NAT Gateways** - Provides internet access to private subnets (optional, can be disabled to reduce costs)
+- **Subnets** - Public subnets across multiple availability zones (private subnets not implemented for cost optimization)
+- **Internet Gateway** - Provides direct internet access to public subnets
 - **Route Tables** - Routing configuration for subnets
 - **Security Groups** - Firewall rules for:
   - SSH access
@@ -24,7 +23,7 @@ This Terraform project creates the common infrastructure needed for all SUSE dem
 2. Edit `terraform.tfvars` and customize the values:
    - Set `owner` to your name
    - **IMPORTANT:** Update `allowed_ssh_cidr_blocks` and `allowed_web_cidr_blocks` to your IP address for security
-   - Set `enable_nat_gateway = false` to reduce costs if private subnet internet access isn't required
+   - Adjust `az_count` if you want to use fewer availability zones (default is 3, minimum 1 for cost savings)
 
 ## Deployment
 
@@ -38,13 +37,13 @@ terraform apply
 
 This module exports outputs that will be used by other projects:
 - VPC ID and CIDR
-- Subnet IDs (public and private)
+- Public subnet IDs
 - Security group IDs
 - Availability zones
 
 ## Cost Optimization
 
 To minimize costs for a demo environment:
-- Set `enable_nat_gateway = false` in `terraform.tfvars` (saves ~$30-45/month per NAT gateway)
-- Use only one availability zone if high availability isn't needed
+- Use only one availability zone if high availability isn't needed (configured via `az_count` variable)
+- All resources use public subnets with Internet Gateway (no NAT Gateway costs)
 - Remember to destroy resources when not in use: `terraform destroy`
