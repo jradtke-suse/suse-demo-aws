@@ -6,7 +6,7 @@
 # in AWS using Terraform modules.
 #
 
-# cd ~/Developer/Projects; curl -sSL https://raw.githubusercontent.com/jradtke-suse/suse-demo-aws/refs/heads/main/Scripts/quick_start.sh | bash -s start
+# cd ~/Developer/Projects; curl -sSL https://raw.githubusercontent.com/jradtke-suse/suse-demo-aws/refs/heads/main/Scripts/quick_start.sh | bash -s start; cd suse-demo-aws; Scripts/quick_start.sh output | grep ssh_comm
 
 set -e  # Exit on error
 
