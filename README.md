@@ -73,7 +73,7 @@ mkdir -p ~/Developer/Projects; cd $_
 # Archive existing demo directory
 [ -d "suse-demo-aws" ] && { i=1; while [ -d "suse-demo-aws-$(printf '%02d' $i)" ]; do ((i++)); done; mv suse-demo-aws "suse-demo-aws-$(printf '%02d' $i)"; }
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
-cp terraform.tfvars.example terraform.tfvars
+cp ../terraform.tfvars.example terraform.tfvars
 vi terraform.tfvars
 alias doeet="terraform init; terraform plan -var-file=../terraform.tfvars; terraform apply -var-file=../terraform.tfvars"
 ```
