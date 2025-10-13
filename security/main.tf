@@ -104,6 +104,14 @@ resource "aws_security_group" "security" {
     cidr_blocks = var.allowed_cidr_blocks
   }
 
+  ingress {
+    description = "Kubernetes API"
+    from_port   = 6443 
+    to_port     = 6443 
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_cidr_blocks
+  }
+
   egress {
     description = "Allow all outbound"
     from_port   = 0
