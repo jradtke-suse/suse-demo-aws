@@ -65,7 +65,7 @@ output "kubectl_commands" {
     # View logs
     ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip} "sudo kubectl logs -n suse-observability -l app=suse-observability-router --tail=100"
 
-    # Get credentials
+    # Get Default Admin password 
     ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.observability[0].public_ip : aws_instance.observability.public_ip} "grep pass /var/log/user-data.log"
   EOT
 }
