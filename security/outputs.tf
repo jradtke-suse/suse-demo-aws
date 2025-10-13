@@ -2,19 +2,19 @@ output "kubectl_commands" {
   description = "Useful kubectl commands for managing SUSE Security"
   value = <<-EOT
     # Get NeuVector pods status
-    ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo kubectl get pods -n neuvector"
+    ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo kubectl get pods -n neuvector"
 
     # Get ingress
-    ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo kubectl get ingress -n neuvector"
+    ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo kubectl get ingress -n neuvector"
 
     # Get certificate (if Let's Encrypt enabled)
-    ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo kubectl get certificate -n neuvector"
+    ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo kubectl get certificate -n neuvector"
 
     # View installation logs
-    ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo tail -f /var/log/user-data.log"
+    ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo tail -f /var/log/user-data.log"
 
     # Acquire Default Login/Password
-    ssh ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "/usr/local/bin/kubectl get secret --namespace neuvector neuvector-bootstrap-secret -o go-template='{{ .data.bootstrapPassword|base64decode}}{{ \"\n\" }}'"
+    ssh -i ~/.ssh/suse-demo-aws.pem ec2-user@${var.create_eip ? aws_eip.security[0].public_ip : aws_instance.security.public_ip} "sudo /usr/local/bin/kubectl get secret --namespace neuvector neuvector-bootstrap-secret -o go-template='{{ .data.bootstrapPassword|base64decode}}{{ \"\n\" }}'"
   EOT
 }
 
