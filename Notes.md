@@ -32,3 +32,7 @@ If you need/want to select a specific AMI, this will help you search
 or, look here  
 https://pint.suse.com/?resource=images&state=active&csp=amazon
 
+## Let's Encrypt considerations
+There are rate limits with LE which are addressed by signifying your certificate as "production" or "staging".  [Let's Encrypt - Rate Limits](https://letsencrypt.org/docs/rate-limits/) - if/when I used the "staging" certificates, I would have connectivity issues and problems with the browser requiring frequent login/re-login.  So, I have opted to test using "production" certificates and I have not hit the rate limits.
+
+
