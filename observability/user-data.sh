@@ -33,6 +33,29 @@ zypper refresh
 zypper update -y
 
 #######################################
+# Validate CA Trust Store
+#######################################
+echo "=== Validating CA Trust Store ==="
+# Install CA certificates package if not present
+zypper install -y ca-certificates-mozilla
+
+# Update trust store
+if update-ca-certificates --fresh; then
+    echo "✓ CA trust store updated successfully"
+else
+    echo "✗ CA trust store update failed"
+    exit 1
+fi
+
+# Verify ISRG Root X1 (Let's Encrypt) is present
+if grep -q "ISRG Root X1" /var/lib/ca-certificates/ca-bundle.pem; then
+    echo "✓ Let's Encrypt root CA is trusted"
+else
+    echo "✗ Let's Encrypt root CA NOT found in trust store"
+    exit 1
+fi
+
+#######################################
 # Install Required Packages
 #######################################
 echo "Installing required packages..."
@@ -49,15 +72,24 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm version
 
 #######################################
-# Install K3s (Lightweight Kubernetes)
+# Install K3s with TLS SANs (Lightweight Kubernetes)
 #######################################
 echo "Installing K3s..."
 
-# TODO: need to incorporate/add syntax to create TLS-SAN for the certs :-(
-#       or... fix the certs post-install?
+# Get instance metadata for TLS certificate SANs
+PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+
+echo "Installing K3s with TLS SANs..."
+echo "  Hostname: ${hostname}.${subdomain}.${root_domain}"
+echo "  Public IP: $PUBLIC_IP"
+echo "  Private IP: $PRIVATE_IP"
 
 # Install K3s with specific options for single-node deployment
-curl -sfL https://get.k3s.io | sh -s - server
+curl -sfL https://get.k3s.io | sh -s - server \
+  --tls-san ${hostname}.${subdomain}.${root_domain} \
+  --tls-san $PUBLIC_IP \
+  --tls-san $PRIVATE_IP
 
 # Wait for K3s service to be active
 echo "Waiting for K3s service to be active..."
@@ -134,6 +166,21 @@ helm install cert-manager jetstack/cert-manager \
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
 
 #######################################
+# Validate cert-manager Installation
+#######################################
+echo "=== Validating cert-manager Installation ==="
+
+# Wait for cert-manager webhook to be ready
+if kubectl wait --for=condition=Available deployment/cert-manager-webhook \
+  -n cert-manager --timeout=300s; then
+    echo "✓ cert-manager webhook is available"
+else
+    echo "✗ cert-manager webhook failed to become available"
+    kubectl logs -n cert-manager -l app=cert-manager --tail=50
+    exit 1
+fi
+
+#######################################
 # Configure Let's Encrypt ClusterIssuer (if enabled)
 #######################################
 %{ if enable_letsencrypt ~}
@@ -146,6 +193,29 @@ ISSUER_EOF
 
 echo "Let's Encrypt ClusterIssuers created (staging and production)"
 echo "Using environment: ${letsencrypt_environment}"
+
+#######################################
+# Validate ClusterIssuers
+#######################################
+echo "=== Validating Let's Encrypt ClusterIssuers ==="
+for issuer in letsencrypt-staging letsencrypt-production; do
+    timeout=60
+    while [ $timeout -gt 0 ]; do
+        status=$(kubectl get clusterissuer $issuer -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)
+        if [ "$status" = "True" ]; then
+            echo "✓ ClusterIssuer $issuer is ready"
+            break
+        fi
+        sleep 2
+        ((timeout--))
+    done
+
+    if [ "$status" != "True" ]; then
+        echo "✗ ClusterIssuer $issuer failed to become ready"
+        kubectl describe clusterissuer $issuer
+        exit 1
+    fi
+done
 %{ endif ~}
 
 #######################################
@@ -227,7 +297,61 @@ ${letsencrypt_certificate}
 CERT_EOF
 
 echo "Certificate resource created - cert-manager will request certificate from Let's Encrypt"
-echo "Monitor certificate status with: kubectl describe certificate observability-tls -n suse-observability"
+
+#######################################
+# Monitor Certificate Issuance
+#######################################
+echo "=== Monitoring Certificate Issuance ==="
+timeout=300
+while [ $timeout -gt 0 ]; do
+    ready=$(kubectl get certificate observability-tls -n suse-observability -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)
+
+    if [ "$ready" = "True" ]; then
+        echo "✓ Certificate observability-tls issued successfully"
+        kubectl get certificate observability-tls -n suse-observability
+        break
+    elif [ "$ready" = "False" ]; then
+        reason=$(kubectl get certificate observability-tls -n suse-observability -o jsonpath='{.status.conditions[?(@.type=="Ready")].message}' 2>/dev/null)
+        echo "⚠ Certificate issuance in progress: $reason"
+    fi
+
+    sleep 5
+    ((timeout--))
+done
+
+if [ "$ready" != "True" ]; then
+    echo "✗ Certificate observability-tls failed to issue within timeout"
+    kubectl describe certificate observability-tls -n suse-observability
+    kubectl describe certificaterequest -n suse-observability
+    kubectl describe order -n suse-observability
+    echo "Note: Certificate may still complete - check with: kubectl describe certificate observability-tls -n suse-observability"
+fi
+
+#######################################
+# Validate HTTPS Endpoint
+#######################################
+echo "=== Validating HTTPS Endpoint ==="
+endpoint="https://${hostname}.${subdomain}.${root_domain}"
+
+# Wait for DNS propagation
+echo "Waiting for DNS propagation..."
+timeout=120
+while [ $timeout -gt 0 ]; do
+    if nslookup ${hostname}.${subdomain}.${root_domain} > /dev/null 2>&1; then
+        echo "✓ DNS resolution successful for ${hostname}.${subdomain}.${root_domain}"
+        break
+    fi
+    sleep 5
+    ((timeout--))
+done
+
+# Test TLS connection (best effort - may fail if still propagating)
+if command -v openssl >/dev/null 2>&1; then
+    echo "Testing TLS certificate chain..."
+    echo | openssl s_client -connect ${hostname}.${subdomain}.${root_domain}:443 -servername ${hostname}.${subdomain}.${root_domain} 2>/dev/null | \
+      openssl x509 -noout -subject -issuer -dates 2>/dev/null || \
+      echo "Note: TLS verification pending - DNS/certificate may still be propagating"
+fi
 %{ endif ~}
 
 #######################################
