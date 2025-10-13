@@ -184,9 +184,12 @@ stop() {
 output() {
     print_header "Terraform Outputs from All Projects"
 
+    # Navigate to repository root (parent directory of Scripts)
+    cd "$(dirname "$0")/.." || exit 1
+
     # Verify we're in the correct directory
     if [ ! -d "shared-services" ]; then
-        print_msg "${RED}" "ERROR: Must be run from the suse-demo-aws repository root"
+        print_msg "${RED}" "ERROR: Cannot find project directories"
         print_msg "${YELLOW}" "Current directory: $(pwd)"
         exit 1
     fi
