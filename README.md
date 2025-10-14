@@ -145,6 +145,10 @@ terraform apply -var-file=../terraform.tfvars
 
 Apply the same pattern for all modules (rancher-manager, observability, security).
 
+## democtl
+Demo Control / Demo Cuddle / Demo [Cuttle Fish?](https://en.wikipedia.org/wiki/Cuttlefish)... anyhow...
+I create Scripts/democtl to manage this demo in a more automated way.  I am mentioning this down here, ALL the way at the bottom, because I think you should do the deployment manually a few times to see what is actually happening.  **Then**... knock yerself out with the cuttle command.
+
 ## Cleanup
 
 To destroy all resources, run `terraform destroy` in reverse order:
