@@ -35,24 +35,13 @@ The demo environment is organized into separate Terraform projects:
 ## Prerequisites
 
 - SUSE Customer Center login and registration for SLES Hosts
-- AWS CLI configured with appropriate credentials
-- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have a permissions to modify records with the IAM principal you utilze.
+- AWS CLI configured with appropriate credentials (STS will work here)
+- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have a permissions to modify records with your IAM principal. 
 - Terraform >= 1.5.0
 
-During the deployment you will need to obtain or create
+During the deployment you will need to provide or create:
 - SSH key pair for EC2 instances
 - HostedZoneId for your TLD
-
-## Notes and Caveats
-
-* This is NOT completely automated.  You will need to proceed with some click-ops, etc.. to connect the different products (i.e. add Rancher Manager to the Observability platform using kubectl/helm).  This is intentional to allow some insight in to how these independent products work together.
-* I have intentionally left some of my own (opinionated) values in some of the variables - specifically my own domain_name.  I feel it makes it easier to understand how the variable values are used.  You MUST, however, update with your own values.
-* I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain.  This is somewhat unique to my own situation as my top-level domain (kubernerdes.com) is owned/managed by another AWS account.  I have delegated this demo domain using [Route53 Multi-Account Delegation](https://github.com/cloudxabide/route53_multi_account_delegation) which is not an official process, but certainly works.
-* Everything is in a public subnet (NATGW is not needed).
-* While there is a separate directory for each SUSE product, they all rely on the tftstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
-* Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running terraforms commands.  I am not positive this was teh best approach, but it was the best I could create given the other project design considerations I imposed on myself.
-
-**NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 
 ## democtl
 Cut right to the chase...
@@ -196,4 +185,16 @@ This section is a work-in-progress and I will update as I learn more.
 You can *always* utilize: [AWS Calculator](https://calculator.aws/) or [Vantage](https://instances.vantage.sh/) 
 
 ![My Cost Estimate](Images/cost-estimate-spreadsheet-10-09.png)
+
+## Notes and Caveats
+
+* This is NOT completely automated.  You will need to proceed with some click-ops, etc.. to connect the different products (i.e. add Rancher Manager to the Observability platform using kubectl/helm).  This is intentional to allow some insight in to how these independent products work together.
+* I have intentionally left some of my own (opinionated) values in some of the variables - specifically my own domain_name.  I feel it makes it easier to understand how the variable values are used.  You MUST, however, update with your own values.
+* I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain.  This is somewhat unique to my own situation as my top-level domain (kubernerdes.com) is owned/managed by another AWS account.  I have delegated this demo domain using [Route53 Multi-Account Delegation](https://github.com/cloudxabide/route53_multi_account_delegation) which is not an official process, but certainly works.
+* Everything is in a public subnet (NATGW is not needed).
+* While there is a separate directory for each SUSE product, they all rely on the tftstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
+* Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running terraforms commands.  I am not positive this was teh best approach, but it was the best I could create given the other project design considerations I imposed on myself.
+
+**NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
+
 
