@@ -475,3 +475,5 @@ echo "To scan an image with Trivy:"
 echo "  trivy image --server http://localhost:8080 your-image:tag"
 echo ""
 echo "Installation logs: /var/log/user-data.log"
+ADMIN_PASSWORD=$(sudo /usr/local/bin/kubectl get secret --namespace neuvector neuvector-bootstrap-secret -o go-template='{{ .data.bootstrapPassword|base64decode}}{{ "\n" }}')
+echo "Initial admin password: $ADMIN_PASSWORD"
