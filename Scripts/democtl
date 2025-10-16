@@ -141,9 +141,12 @@ build() {
 destroy() {
     print_header "Destroying SUSE Demo AWS Infrastructure"
 
+    # Navigate to repository root (parent directory of Scripts)
+    cd "$(dirname "$0")/.." || exit 1
+
     # Verify we're in the correct directory
     if [ ! -d "shared-services" ]; then
-        print_msg "${RED}" "ERROR: Must be run from the suse-demo-aws repository root"
+        print_msg "${RED}" "ERROR: Cannot find project directories"
         print_msg "${YELLOW}" "Current directory: $(pwd)"
         exit 1
     fi
@@ -164,6 +167,7 @@ destroy() {
 
         cd "${PROJECT}" || exit 1
 
+        terraform init || { print_msg "${RED}" "Failed to initialize ${PROJECT}"; exit 1; }
         echo "yes" | terraform destroy -var-file=../terraform.tfvars || {
             print_msg "${RED}" "Failed to destroy ${PROJECT}"
             print_msg "${YELLOW}" "You may need to manually destroy remaining resources"
