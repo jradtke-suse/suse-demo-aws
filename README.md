@@ -16,7 +16,7 @@ This is very much still a work-in-progress at this time (2025 October) but overa
 | **SUSE Observability**   | Done   |
 | **SUSE Security**        | Done (mostly) | 
 
-## Products Included or Utilized
+## Products In-Scope
 
 - **SUSE Rancher Manager** - Kubernetes management platform
 - **SUSE Observability** - Monitoring and observability solution
@@ -36,7 +36,7 @@ The demo environment is organized into separate Terraform projects:
 
 - SUSE Customer Center login and registration for SLES Hosts
 - AWS CLI configured with appropriate credentials (STS will work here)
-- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have a permissions to modify records with your IAM principal. 
+- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have permissions to modify records with your IAM principal. 
 - Terraform >= 1.5.0
 
 During the deployment you will need to provide or create:
