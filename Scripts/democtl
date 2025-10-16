@@ -6,7 +6,7 @@
 # in AWS using Terraform modules.
 #
 
-# cd ~/Developer/Projects; curl -sSL https://raw.githubusercontent.com/jradtke-suse/suse-demo-aws/refs/heads/main/Scripts/democtl | bash -s start; cd suse-demo-aws; Scripts/democtl output | grep ssh_comm
+# cd ~/Developer/Projects; curl -sSL https://raw.githubusercontent.com/jradtke-suse/suse-demo-aws/refs/heads/main/Scripts/democtl | bash -s build; cd suse-demo-aws; Scripts/democtl output | grep ssh_comm
 
 set -e  # Exit on error
 
@@ -67,10 +67,10 @@ archive_existing() {
 }
 
 #######################################
-# Start: Deploy all infrastructure
+# Build: Deploy all infrastructure
 #######################################
-start() {
-    print_header "Starting SUSE Demo AWS Deployment"
+build() {
+    print_header "Building SUSE Demo AWS Deployment"
 
     # Create and navigate to projects directory
     mkdir -p "${PROJECTS_DIR}"
@@ -135,10 +135,10 @@ start() {
 }
 
 #######################################
-# Stop: Destroy all infrastructure
+# Destroy: Destroy all infrastructure
 # CRITICAL: Destroys in REVERSE order to respect dependencies
 #######################################
-stop() {
+destroy() {
     print_header "Destroying SUSE Demo AWS Infrastructure"
 
     # Verify we're in the correct directory
@@ -356,13 +356,13 @@ USAGE:
     $(basename "$0") [OPTION]
 
 OPTIONS:
-    start       Deploy all SUSE demo infrastructure in AWS
+    build       Deploy all SUSE demo infrastructure in AWS
                 - Creates/archives project directory
                 - Clones repository
                 - Deploys: shared-services, rancher-manager, observability, security
                 - Displays all outputs
 
-    stop        Destroy all SUSE demo infrastructure
+    destroy     Destroy all SUSE demo infrastructure
                 - Destroys in reverse order: security, observability, rancher-manager, shared-services
                 - Prompts for confirmation before proceeding
                 - CRITICAL: Respects Terraform state dependencies
@@ -400,7 +400,7 @@ PREREQUISITES:
 
 EXAMPLES:
     # Deploy infrastructure
-    $(basename "$0") start
+    $(basename "$0") build
 
     # Display terraform outputs
     $(basename "$0") output
@@ -409,7 +409,7 @@ EXAMPLES:
     $(basename "$0") getkube
 
     # Destroy infrastructure
-    $(basename "$0") stop
+    $(basename "$0") destroy
 
     # Show help
     $(basename "$0") help
@@ -430,11 +430,11 @@ EOF
 #######################################
 main() {
     case "${1:-}" in
-        start)
-            start
+        build)
+            build
             ;;
-        stop)
-            stop
+        destroy)
+            destroy
             ;;
         output)
             output

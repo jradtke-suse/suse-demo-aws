@@ -152,7 +152,7 @@ I create Scripts/democtl to manage this demo in a more automated way.  I am ment
 ```
 EXAMPLES:
     # Deploy infrastructure
-    democtl start
+    democtl build
 
     # Display terraform outputs
     democtl output
@@ -161,7 +161,7 @@ EXAMPLES:
     democtl getkube
 
     # Destroy infrastructure
-    democtl stop
+    democtl destroy
 
     # Show help
     democtl help
