@@ -45,7 +45,7 @@ During the deployment you will need to obtain or create
 
 ## Notes and Caveats
 
-* This is NOT completely automated.  You will need to roll with some click-ops, etc.. to connect the different products (i.e. add Rancher Manager to the Observability platform using kubectl/helm).  This is intentional to allow some insight in to how these independent products work together.
+* This is NOT completely automated.  You will need to proceed with some click-ops, etc.. to connect the different products (i.e. add Rancher Manager to the Observability platform using kubectl/helm).  This is intentional to allow some insight in to how these independent products work together.
 * I have intentionally left some of my own (opinionated) values in some of the variables - specifically my own domain_name.  I feel it makes it easier to understand how the variable values are used.  You MUST, however, update with your own values.
 * I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain.  This is somewhat unique to my own situation as my top-level domain (kubernerdes.com) is owned/managed by another AWS account.  I have delegated this demo domain using [Route53 Multi-Account Delegation](https://github.com/cloudxabide/route53_multi_account_delegation) which is not an official process, but certainly works.
 * Everything is in a public subnet (NATGW is not needed).
@@ -53,6 +53,33 @@ During the deployment you will need to obtain or create
 * Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running terraforms commands.  I am not positive this was teh best approach, but it was the best I could create given the other project design considerations I imposed on myself.
 
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
+
+## democtl
+Cut right to the chase...
+
+Demo Control / Demo Cuddle / Demo [Cuttle Fish?](https://en.wikipedia.org/wiki/Cuttlefish)... anyhow...
+I create Scripts/democtl to manage this demo in a more automated way.  I am mentioning this down here, ALL the way at the bottom, because I think you should do the deployment manually a few times to see what is actually happening.  **Then**... knock yerself out with the cuttle command.
+
+Sync this this repo and cd in to it, update terraform.tfvars, then have some fun:
+```
+EXAMPLES:
+    # Deploy infrastructure
+    Scripts/democtl build
+
+    # Display terraform outputs
+    Scripts/democtl output
+
+    # Retrieve kubeconfig files
+    Scripts/democtl getkube
+
+    # Destroy infrastructure
+    Scripts/democtl destroy
+
+    # Show help
+    Scripts/democtl help
+```
+
+If you are more interested in some manual steps, continue reading...
 
 ## Deployment Order
 
@@ -73,9 +100,8 @@ mkdir -p ~/Developer/Projects; cd $_
 # Archive existing demo directory
 [ -d "suse-demo-aws" ] && { i=1; while [ -d "suse-demo-aws-$(printf '%02d' $i)" ]; do ((i++)); done; mv suse-demo-aws "suse-demo-aws-$(printf '%02d' $i)"; }
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
-cp ../terraform.tfvars.example terraform.tfvars
+cp ../terraform.tfvars.example terraform.tfvars # I store a "hydrated configuraiton" that has all the values populated
 vi terraform.tfvars
-alias doeet="terraform init; terraform plan -var-file=../terraform.tfvars; terraform apply -var-file=../terraform.tfvars"
 ```
 
 Update key values (examples here):
@@ -92,6 +118,7 @@ cd shared-services
 terraform init
 terraform plan -var-file=../terraform.tfvars
 terraform apply -var-file=../terraform.tfvars
+cd -
 ```
 
 ### 3. Deploy SUSE Rancher Manager
@@ -101,6 +128,7 @@ cd ../rancher-manager
 terraform init
 terraform plan -var-file=../terraform.tfvars
 terraform apply -var-file=../terraform.tfvars
+cd -
 ```
 
 ### 4. Deploy SUSE Observability
@@ -110,6 +138,7 @@ cd ../observability
 terraform init
 terraform plan -var-file=../terraform.tfvars
 terraform apply -var-file=../terraform.tfvars
+cd -
 ```
 
 ### 5. Deploy SUSE Security
@@ -119,6 +148,7 @@ cd ../security
 terraform init
 terraform plan -var-file=../terraform.tfvars
 terraform apply -var-file=../terraform.tfvars
+cd -
 ```
 
 ## Configuration
@@ -145,27 +175,6 @@ terraform apply -var-file=../terraform.tfvars
 
 Apply the same pattern for all modules (rancher-manager, observability, security).
 
-## democtl
-Demo Control / Demo Cuddle / Demo [Cuttle Fish?](https://en.wikipedia.org/wiki/Cuttlefish)... anyhow...
-I create Scripts/democtl to manage this demo in a more automated way.  I am mentioning this down here, ALL the way at the bottom, because I think you should do the deployment manually a few times to see what is actually happening.  **Then**... knock yerself out with the cuttle command.
-
-```
-EXAMPLES:
-    # Deploy infrastructure
-    democtl build
-
-    # Display terraform outputs
-    democtl output
-
-    # Retrieve kubeconfig files
-    democtl getkube
-
-    # Destroy infrastructure
-    democtl destroy
-
-    # Show help
-    democtl help
-```
 ## Cleanup
 
 To destroy all resources, run `terraform destroy` in reverse order:
