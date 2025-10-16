@@ -167,7 +167,6 @@ destroy() {
 
         cd "${PROJECT}" || exit 1
 
-        terraform init || { print_msg "${RED}" "Failed to initialize ${PROJECT}"; exit 1; }
         echo "yes" | terraform destroy -var-file=../terraform.tfvars || {
             print_msg "${RED}" "Failed to destroy ${PROJECT}"
             print_msg "${YELLOW}" "You may need to manually destroy remaining resources"
