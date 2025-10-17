@@ -8,8 +8,6 @@
 
 # cd ~/Developer/Projects; curl -sSL https://raw.githubusercontent.com/jradtke-suse/suse-demo-aws/refs/heads/main/Scripts/democtl | bash -s build; cd suse-demo-aws; Scripts/democtl output | grep ssh_comm
 
-set -e  # Exit on error
-
 # Color codes for output
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
