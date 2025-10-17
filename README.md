@@ -14,7 +14,7 @@ This is very much still a work-in-progress at this time (2025 October) but overa
 | Shared Services          | Done   | 
 | **SUSE Rancher Manager** | Done   |
 | **SUSE Observability**   | Done   |
-| **SUSE Security**        | Done (mostly) | 
+| **SUSE Security**        | Done   | 
 
 ## Products In-Scope
 
@@ -37,9 +37,12 @@ The demo environment is organized into separate OpenTofu modules:
 - **OpenTofu >= 1.5.0** - Infrastructure provisioning tool
   - macOS: `brew install opentofu`
   - Other platforms: https://opentofu.org/docs/intro/install/
-- **SUSE Customer Center** login and registration for SLES Hosts
 - **AWS CLI** configured with appropriate credentials (STS will work here)
 - **Route53 Domain** - A Top-Level Domain (TLD) hosted by AWS that you own/manage, with permissions to modify records
+
+Optional Prerequisites: 
+- **SUSE Customer Center** login and registration for SLES Hosts, if you want Bring Your Own Subscription (BYOS)
+  - You may use AWS Marketplace Pay As You Go (PAYG) instead.  Just update the "ami_id" in your terraform.tfvars file.
 
 During the deployment you will need to provide or create:
 - SSH key pair for EC2 instances
@@ -175,10 +178,10 @@ To destroy all resources, run `tofu destroy` in reverse order:
 Also, if you do not see/recognize the risk in the following commands, I'd probably just run them manually ;-)  (hint: you shouldn't *really* echo "yes" to a command, let alone a command with "destroy" in it.  - you've been warned)
 
 ```bash
-cd security && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd ..
-cd observability && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd ..
-cd rancher-manager && echo "yes" | tofu destroy -var-file=../terraform.tfvars;  cd ..
-cd shared-services && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd ..
+cd security && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd - 
+cd observability && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd  -
+cd rancher-manager && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd -
+cd shared-services && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd -
 ```
 
 ## Cost Estimates
