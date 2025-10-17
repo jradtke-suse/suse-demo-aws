@@ -253,11 +253,7 @@ output() {
 
         cd "${PROJECT}" || exit 1
 
-        if [ ! -f "terraform.tfstate" ]; then
-            print_msg "${YELLOW}" "No OpenTofu state found - project may not be deployed"
-        else
-            tofu output || print_msg "${YELLOW}" "No outputs available for ${PROJECT}"
-        fi
+        tofu output
 
         cd - > /dev/null || exit 1
     done
@@ -301,12 +297,6 @@ getkube() {
         fi
 
         cd "${PROJECT}" || exit 1
-
-        if [ ! -f "terraform.tfstate" ]; then
-            print_msg "${YELLOW}" "No OpenTofu state found - ${PROJECT} may not be deployed"
-            cd - > /dev/null || exit 1
-            continue
-        fi
 
         # Get ssh_command output which contains the IP address
         local ssh_cmd
