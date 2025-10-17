@@ -1,6 +1,6 @@
 # SUSE Observability
 
-This Terraform project deploys SUSE Observability (powered by StackState) on AWS.
+This OpenTofu project deploys SUSE Observability (powered by StackState) on AWS.
 
 ## Overview
 
@@ -23,7 +23,7 @@ All components run on a single EC2 instance with:
 1. **Shared Services infrastructure must be deployed first**
    ```bash
    cd ../shared-services
-   terraform apply
+   tofu apply
    ```
 
 2. **SUSE Observability license key** - Required for deployment
@@ -103,9 +103,9 @@ Deploy using the unified configuration file from the repository root:
 
 ```bash
 cd observability
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 ```
 
 **Installation time:** ~15-20 minutes for complete setup
@@ -117,19 +117,19 @@ After deployment, wait ~15-20 minutes for the installation to complete.
 ### Get Access URL
 
 ```bash
-terraform output observability_url
+tofu output observability_url
 ```
 
 ### Access SUSE Observability UI
 
 - **With Route53/Let's Encrypt:** `https://observability.suse-demo-aws.kubernerdes.com`
-- **Without DNS:** Use the output from `terraform output observability_url`
+- **Without DNS:** Use the output from `tofu output observability_url`
 
 ### Get Admin Credentials
 
 ```bash
 # SSH to the instance
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 
 # View the admin credentials
 cat /root/suse-observability-credentials.txt
@@ -182,7 +182,7 @@ Refer to [SUSE Observability documentation](https://docs.stackstate.com/) for de
 
 ```bash
 # Get SSH command and connect
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 
 # Verify K3s cluster
 kubectl get nodes
@@ -209,7 +209,7 @@ When `enable_letsencrypt = true` and Route53 DNS is configured:
 
 ```bash
 # SSH to instance
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 
 # Check certificate status
 kubectl get certificate -n suse-observability
@@ -225,7 +225,7 @@ kubectl logs -n cert-manager -l app=cert-manager -f
 
 **Switching from staging to production:**
 1. Update `letsencrypt_environment = "production"` in `terraform.tfvars`
-2. Run `terraform apply -var-file=../terraform.tfvars`
+2. Run `tofu apply -var-file=../terraform.tfvars`
 3. Wait for cert-manager to issue new certificate (~2-5 minutes)
 
 ## Cost Optimization
@@ -233,7 +233,7 @@ kubectl logs -n cert-manager -l app=cert-manager -f
 - Default instance type is `t3.xlarge` (~$0.17/hour, ~$122/month)
 - Minimum instance type for 10-nonha profile is `t3.xlarge`
 - Set `create_eip = false` to avoid Elastic IP charges (~$3.60/month)
-- Remember to destroy when not in use: `terraform destroy -var-file=../terraform.tfvars`
+- Remember to destroy when not in use: `tofu destroy -var-file=../terraform.tfvars`
 
 ## Troubleshooting
 
@@ -255,7 +255,7 @@ kubectl logs -n cert-manager -l app=cert-manager -f
 3. **Check SUSE Observability deployment:**
    ```bash
    # SSH to instance
-   $(terraform output -raw ssh_command)
+   $(tofu output -raw ssh_command)
 
    # Check pods
    kubectl get pods -n suse-observability
@@ -294,7 +294,7 @@ kubectl logs -n cert-manager -l app=cert-manager -f
 3. **Verify Route53 permissions:**
    ```bash
    # Check IAM role has Route53 permissions
-   aws iam list-attached-role-policies --role-name $(terraform output -raw instance_id | xargs aws ec2 describe-instances --instance-ids --query "Reservations[].Instances[].IamInstanceProfile.Arn" --output text | cut -d'/' -f2)
+   aws iam list-attached-role-policies --role-name $(tofu output -raw instance_id | xargs aws ec2 describe-instances --instance-ids --query "Reservations[].Instances[].IamInstanceProfile.Arn" --output text | cut -d'/' -f2)
    ```
 
 ### Installation logs
@@ -302,7 +302,7 @@ kubectl logs -n cert-manager -l app=cert-manager -f
 **View complete installation logs:**
 
 ```bash
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 sudo tail -f /var/log/user-data.log
 sudo journalctl -u cloud-init-output
 ```

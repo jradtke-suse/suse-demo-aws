@@ -16,7 +16,7 @@ All components run on a single EC2 instance with SUSE Linux Enterprise Server (S
 1. **Shared Services infrastructure must be deployed first**
    ```bash
    cd ../shared-services
-   terraform apply
+   tofu apply
    ```
 
 2. **Unified configuration file** - Use the repository root `terraform.tfvars` file (see Configuration section below)
@@ -89,9 +89,9 @@ Deploy using the unified configuration file from the repository root:
 
 ```bash
 cd security
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 ```
 
 **Installation time:** ~10-15 minutes for complete setup
@@ -102,16 +102,16 @@ After deployment, wait ~10-15 minutes for the installation to complete.
 
 ### Get Access URLs
 ```bash
-terraform output neuvector_url  # NeuVector web UI
-terraform output trivy_url      # Trivy server endpoint
-terraform output ssh_command    # SSH access command
+tofu output neuvector_url  # NeuVector web UI
+tofu output trivy_url      # Trivy server endpoint
+tofu output ssh_command    # SSH access command
 ```
 
 ### NeuVector (Container Security)
 
 **Access NeuVector UI:**
 - With Route53/Let's Encrypt: `https://security.suse-demo-aws.example.com`
-- Without DNS: Use the output from `terraform output neuvector_url`
+- Without DNS: Use the output from `tofu output neuvector_url`
 
 **Default credentials:** `admin` / `admin`
 **⚠️ IMPORTANT:** Change the password immediately on first login!
@@ -130,7 +130,7 @@ Trivy runs as a server on port 8080 for centralized vulnerability scanning.
 **Scan container images from your local machine:**
 ```bash
 # Get Trivy server URL
-TRIVY_SERVER=$(terraform output -raw trivy_url)
+TRIVY_SERVER=$(tofu output -raw trivy_url)
 
 # Scan an image
 trivy image --server $TRIVY_SERVER nginx:latest
@@ -151,7 +151,7 @@ Falco runs as a systemd service and monitors kernel system calls for suspicious 
 **View Falco alerts in real-time:**
 ```bash
 # SSH to instance
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 
 # View live Falco alerts
 sudo journalctl -u falco -f
@@ -212,7 +212,7 @@ When `enable_letsencrypt = true` and Route53 DNS is configured:
 **Monitor certificate issuance:**
 ```bash
 # SSH to instance
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 
 # Check certificate status
 kubectl get certificate -n neuvector
@@ -228,7 +228,7 @@ kubectl logs -n cert-manager -l app=cert-manager -f
 
 **Switching from staging to production:**
 1. Update `letsencrypt_environment = "production"` in `terraform.tfvars`
-2. Run `terraform apply -var-file=../terraform.tfvars`
+2. Run `tofu apply -var-file=../terraform.tfvars`
 3. Wait for cert-manager to issue new certificate (~2-5 minutes)
 
 ## Integration with Rancher Manager
@@ -250,7 +250,7 @@ This allows centralized security management across multiple Kubernetes clusters.
 **Check deployment status:**
 ```bash
 # Get SSH command and connect
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 
 # Verify K3s cluster
 kubectl get nodes
@@ -275,7 +275,7 @@ sudo journalctl -u cloud-init-output -f
 
 - Default instance type is `t3.large` (~$0.08/hour, ~$58/month)
 - Set `create_eip = false` to avoid Elastic IP charges (~$3.60/month)
-- Remember to destroy when not in use: `terraform destroy`
+- Remember to destroy when not in use: `tofu destroy`
 
 ## Security Best Practices
 
@@ -305,7 +305,7 @@ sudo journalctl -u cloud-init-output -f
 3. **Check NeuVector deployment:**
    ```bash
    # SSH to instance
-   $(terraform output -raw ssh_command)
+   $(tofu output -raw ssh_command)
 
    # Check pods
    kubectl get pods -n neuvector
@@ -344,14 +344,14 @@ sudo journalctl -u cloud-init-output -f
 3. **Verify Route53 permissions:**
    ```bash
    # Check IAM role has Route53 permissions
-   aws iam get-role-policy --role-name $(terraform output -raw instance_id | xargs aws ec2 describe-instances --instance-ids {} --query "Reservations[].Instances[].IamInstanceProfile.Arn" --output text | cut -d'/' -f2)
+   aws iam get-role-policy --role-name $(tofu output -raw instance_id | xargs aws ec2 describe-instances --instance-ids {} --query "Reservations[].Instances[].IamInstanceProfile.Arn" --output text | cut -d'/' -f2)
    ```
 
 ### Installation logs
 
 **View complete installation logs:**
 ```bash
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 sudo tail -f /var/log/user-data.log
 sudo journalctl -u cloud-init-output
 ```
