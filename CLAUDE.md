@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository contains Terraform infrastructure-as-code for deploying a complete SUSE product demo environment in AWS. The project is organized as separate Terraform modules that must be deployed in a specific order due to state dependencies.
+This repository contains OpenTofu infrastructure-as-code for deploying a complete SUSE product demo environment in AWS. The project is organized as separate OpenTofu modules that must be deployed in a specific order due to state dependencies.
 
 ## Architecture
 
@@ -17,7 +17,7 @@ The infrastructure is modularized into four main components:
 
 ### State Dependencies
 
-All product modules depend on the shared-services Terraform state file located at `shared-services/terraform.tfstate`. This creates a critical dependency chain:
+All product modules depend on the shared-services OpenTofu state file located at `shared-services/terraform.tfstate`. This creates a critical dependency chain:
 - Product modules reference shared infrastructure via `terraform_remote_state` data sources
 - The shared-services module MUST be deployed first and destroyed last
 - Never modify shared-services after other modules are deployed
@@ -28,28 +28,28 @@ All product modules depend on the shared-services Terraform state file located a
 ```bash
 # 1. Deploy shared services first
 cd shared-services
-terraform init
-terraform plan
-terraform apply
+tofu init
+tofu plan
+tofu apply
 
 # 2. Deploy individual SUSE products
 cd ../rancher-manager
-terraform init && terraform plan && terraform apply
+tofu init && tofu plan && tofu apply
 
 cd ../observability
-terraform init && terraform plan && terraform apply
+tofu init && tofu plan && tofu apply
 
 cd ../security
-terraform init && terraform plan && terraform apply
+tofu init && tofu plan && tofu apply
 ```
 
 ### Destruction Order (Required)
 ```bash
 # Destroy in reverse order to respect dependencies
-cd ./security && terraform destroy && cd -
-cd ./observability && terraform destroy && cd -
-cd ./rancher-manager && terraform destroy && cd -
-cd ./shared-services && terraform destroy && cd -
+cd ./security && tofu destroy && cd -
+cd ./observability && tofu destroy && cd -
+cd ./rancher-manager && tofu destroy && cd -
+cd ./shared-services && tofu destroy && cd -
 ```
 
 ### Configuration Management
@@ -63,7 +63,7 @@ Each module has its own `terraform.tfvars.example` file that should be copied to
 ## Key Technical Details
 
 ### Provider Requirements
-- Terraform >= 1.5.0
+- OpenTofu >= 1.5.0
 - AWS Provider ~> 5.0
 - All modules use consistent default tags (Environment, Project, ManagedBy, Owner)
 
@@ -87,4 +87,4 @@ Each module has its own `terraform.tfvars.example` file that should be copied to
 - This is a **demo/lab environment only** - not suitable for production
 - Cost optimization decisions (public subnets, no NAT Gateway) compromise security
 - All infrastructure uses a subdomain: `suse-demo-aws.kubernerdes.com`
-- Manual confirmation required for terraform destroy operations
+- Manual confirmation required for tofu destroy operations

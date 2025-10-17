@@ -1,6 +1,6 @@
 # Shared Services
 
-This Terraform project creates the common infrastructure needed for all SUSE demo products.
+This OpenTofu project creates the common infrastructure needed for all SUSE demo products.
 
 ## Resources Created
 
@@ -28,9 +28,9 @@ This Terraform project creates the common infrastructure needed for all SUSE dem
 ## Deployment
 
 ```bash
-terraform init
-terraform plan
-terraform apply
+tofu init
+tofu plan
+tofu apply
 ```
 
 ## Outputs
@@ -46,4 +46,4 @@ This module exports outputs that will be used by other projects:
 To minimize costs for a demo environment:
 - Use only one availability zone if high availability isn't needed (configured via `az_count` variable)
 - All resources use public subnets with Internet Gateway (no NAT Gateway costs)
-- Remember to destroy resources when not in use: `terraform destroy`
+- Remember to destroy resources when not in use: `tofu destroy`

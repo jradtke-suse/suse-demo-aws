@@ -1,6 +1,6 @@
 # SUSE Rancher Manager
 
-This Terraform project deploys SUSE Rancher Manager on AWS.
+This OpenTofu project deploys SUSE Rancher Manager on AWS.
 
 ## Overview
 
@@ -105,7 +105,7 @@ When Route53 DNS is configured, you can enable automatic TLS certificate provisi
 
 3. **Switching from staging to production:**
    - Update `letsencrypt_environment = "production"` in `terraform.tfvars`
-   - Run `terraform apply -var-file=../terraform.tfvars`
+   - Run `tofu apply -var-file=../terraform.tfvars`
    - Wait for cert-manager to issue new certificate (~2-5 minutes)
 
 ## Deployment
@@ -114,9 +114,9 @@ Deploy using the unified configuration file from the repository root:
 
 ```bash
 cd rancher-manager
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 ```
 
 **Installation time:** ~10-15 minutes for complete setup
@@ -127,7 +127,7 @@ After deployment (wait ~10-15 minutes for installation to complete):
 
 1. Get the Rancher URL from outputs:
    ```bash
-   terraform output rancher_url
+   tofu output rancher_url
    ```
 
 2. Access Rancher in your browser using the URL
@@ -142,7 +142,7 @@ SSH into the instance and monitor the installation:
 
 ```bash
 # Get SSH command
-terraform output ssh_command
+tofu output ssh_command
 
 # Once connected, monitor the installation
 sudo journalctl -u cloud-init-output -f
@@ -155,7 +155,7 @@ sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get pods -n cattle-system
 
 - Default instance type is `t3.xlarge` (~$0.17/hour, ~$122/month)
 - Set `create_eip = false` to avoid Elastic IP charges (~$3.60/month)
-- Remember to destroy when not in use: `terraform destroy`
+- Remember to destroy when not in use: `tofu destroy`
 
 ## Monitoring Let's Encrypt Certificates
 
@@ -163,7 +163,7 @@ When Let's Encrypt is enabled, monitor certificate issuance:
 
 ```bash
 # SSH to instance
-$(terraform output -raw ssh_command)
+$(tofu output -raw ssh_command)
 
 # Check certificate status
 sudo kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get certificate -n cattle-system
@@ -182,7 +182,7 @@ If Rancher is not accessible:
 4. Check security group allows your IP address
 5. If using Route53, verify DNS record was created:
    ```bash
-   terraform output route53_record
+   tofu output route53_record
    nslookup rancher.suse-demo-aws.kubernerdes.com
    ```
 6. If DNS is configured but SSL fails, wait for cert-manager to issue certificates (~2-5 minutes)

@@ -16,7 +16,7 @@ provider "aws" {
     tags = {
       Environment = var.environment
       Project     = "suse-demo"
-      ManagedBy   = "terraform"
+      ManagedBy   = "opentofu"
       Owner       = var.owner
     }
   }

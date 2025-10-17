@@ -17,7 +17,7 @@ provider "aws" {
       Environment = var.environment
       Project     = "suse-demo"
       Component   = "observability"
-      ManagedBy   = "terraform"
+      ManagedBy   = "opentofu"
       Owner       = var.owner
     }
   }

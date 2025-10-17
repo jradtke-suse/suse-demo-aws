@@ -1,7 +1,7 @@
 # SUSE Demo Environment - AWS
 
 ## Purpose
-This repository contains Terraform projects to deploy a SUSE demo environment with a number of products running in AWS.  The terraform code here will deploy the core product with fundamental configuration needed.  After that, the demo requires some interactive updates via the WebUI or Kubernetes API.
+This repository contains OpenTofu projects to deploy a SUSE demo environment with a number of products running in AWS.  The infrastructure code here will deploy the core product with fundamental configuration needed.  After that, the demo requires some interactive updates via the WebUI or Kubernetes API.
 
 This demo will have a cost associated with it - as it runs in AWS and I have opted to use SLES.  
 I  have published some cost estimates (with AWS Calculator output).  
@@ -25,7 +25,7 @@ This is very much still a work-in-progress at this time (2025 October) but overa
 
 ## Architecture
 
-The demo environment is organized into separate Terraform projects:
+The demo environment is organized into separate OpenTofu modules:
 
 - **shared-services/** - Common infrastructure (VPC, networking, security groups, etc.)
 - **rancher-manager/** - SUSE Rancher Manager deployment
@@ -36,8 +36,8 @@ The demo environment is organized into separate Terraform projects:
 
 - SUSE Customer Center login and registration for SLES Hosts
 - AWS CLI configured with appropriate credentials (STS will work here)
-- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have permissions to modify records with your IAM principal. 
-- Terraform >= 1.5.0
+- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have permissions to modify records with your IAM principal.
+- OpenTofu >= 1.5.0
 
 During the deployment you will need to provide or create:
 - SSH key pair for EC2 instances
@@ -104,9 +104,9 @@ Update key values (examples here):
 
 ```bash
 cd shared-services
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 cd -
 ```
 
@@ -114,9 +114,9 @@ cd -
 
 ```bash
 cd ../rancher-manager
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 cd -
 ```
 
@@ -124,9 +124,9 @@ cd -
 
 ```bash
 cd ../observability
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 cd -
 ```
 
@@ -134,9 +134,9 @@ cd -
 
 ```bash
 cd ../security
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 cd -
 ```
 
@@ -153,30 +153,30 @@ cd -
 - **Common Variables:** Shared variables defined in `common-vars.tf` (symlinked into each module)
 
 ### Usage
-When running Terraform commands, reference the root configuration file:
+When running OpenTofu commands, reference the root configuration file:
 
 ```bash
 cd shared-services
-terraform init
-terraform plan -var-file=../terraform.tfvars
-terraform apply -var-file=../terraform.tfvars
+tofu init
+tofu plan -var-file=../terraform.tfvars
+tofu apply -var-file=../terraform.tfvars
 ```
 
 Apply the same pattern for all modules (rancher-manager, observability, security).
 
 ## Cleanup
 
-To destroy all resources, run `terraform destroy` in reverse order:
+To destroy all resources, run `tofu destroy` in reverse order:
 
 **Important:** Destroy in reverse order to respect state dependencies. You must type "yes" and hit enter for each module.
 
 Also, if you do not see/recognize the risk in the following commands, I'd probably just run them manually ;-)  (hint: you shouldn't *really* echo "yes" to a command, let alone a command with "destroy" in it.  - you've been warned)
 
 ```bash
-cd security && echo "yes" | terraform destroy -var-file=../terraform.tfvars; cd ..
-cd observability && echo "yes" | terraform destroy -var-file=../terraform.tfvars; cd ..
-cd rancher-manager && echo "yes" | terraform destroy -var-file=../terraform.tfvars;  cd ..
-cd shared-services && echo "yes" | terraform destroy -var-file=../terraform.tfvars; cd ..
+cd security && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd ..
+cd observability && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd ..
+cd rancher-manager && echo "yes" | tofu destroy -var-file=../terraform.tfvars;  cd ..
+cd shared-services && echo "yes" | tofu destroy -var-file=../terraform.tfvars; cd ..
 ```
 
 ## Cost Estimates
@@ -192,8 +192,8 @@ You can *always* utilize: [AWS Calculator](https://calculator.aws/) or [Vantage]
 * I have intentionally left some of my own (opinionated) values in some of the variables - specifically my own domain_name.  I feel it makes it easier to understand how the variable values are used.  You MUST, however, update with your own values.
 * I have created a sub-domain for this demo (suse-demo-aws.kubernerdes.com) and an IAM principal with the appropriate permissions that allows me to create records in that domain.  This is somewhat unique to my own situation as my top-level domain (kubernerdes.com) is owned/managed by another AWS account.  I have delegated this demo domain using [Route53 Multi-Account Delegation](https://github.com/cloudxabide/route53_multi_account_delegation) which is not an official process, but certainly works.
 * Everything is in a public subnet (NATGW is not needed).
-* While there is a separate directory for each SUSE product, they all rely on the tftstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
-* Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running terraforms commands.  I am not positive this was teh best approach, but it was the best I could create given the other project design considerations I imposed on myself.
+* While there is a separate directory for each SUSE product, they all rely on the tfstate file in the shared-services directory.  Therefore, do not modify the "shared-services" once it has been deployed, and remove that infrastructure last.
+* Similar to the state-file I just mentioned, there is a single terraform.tfvars file in the root/base directory which requires you to reference it when running OpenTofu commands.  I am not positive this was the best approach, but it was the best I could create given the other project design considerations I imposed on myself.
 
 **NOTE:** This is ONLY intended to run as a demo/lab. Trade-offs have been made to minimize cost which make this approach unacceptable for production use-cases.
 

@@ -110,9 +110,9 @@ build() {
 
         cd "${PROJECT}" || exit 1
 
-        terraform init || { print_msg "${RED}" "Failed to initialize ${PROJECT}"; exit 1; }
-        terraform plan -var-file=../terraform.tfvars || { print_msg "${RED}" "Failed to plan ${PROJECT}"; exit 1; }
-        echo "yes" | terraform apply -var-file=../terraform.tfvars || { print_msg "${RED}" "Failed to apply ${PROJECT}"; exit 1; }
+        tofu init || { print_msg "${RED}" "Failed to initialize ${PROJECT}"; exit 1; }
+        tofu plan -var-file=../terraform.tfvars || { print_msg "${RED}" "Failed to plan ${PROJECT}"; exit 1; }
+        echo "yes" | tofu apply -var-file=../terraform.tfvars || { print_msg "${RED}" "Failed to apply ${PROJECT}"; exit 1; }
 
         cd - > /dev/null || exit 1
         print_msg "${GREEN}" "Successfully deployed: ${PROJECT}"
@@ -126,7 +126,7 @@ build() {
         print_msg "${BLUE}" "Output from: ${PROJECT}"
         print_msg "${BLUE}" "----------------------------------------"
         cd "${PROJECT}" || exit 1
-        terraform output
+        tofu output
         cd - > /dev/null || exit 1
     done
 
@@ -167,7 +167,7 @@ destroy() {
 
         cd "${PROJECT}" || exit 1
 
-        echo "yes" | terraform destroy -var-file=../terraform.tfvars || {
+        echo "yes" | tofu destroy -var-file=../terraform.tfvars || {
             print_msg "${RED}" "Failed to destroy ${PROJECT}"
             print_msg "${YELLOW}" "You may need to manually destroy remaining resources"
             exit 1
@@ -182,10 +182,10 @@ destroy() {
 }
 
 #######################################
-# Output: Display terraform outputs from all projects
+# Output: Display OpenTofu outputs from all projects
 #######################################
 output() {
-    print_header "Terraform Outputs from All Projects"
+    print_header "OpenTofu Outputs from All Projects"
 
     # Navigate to repository root (parent directory of Scripts)
     cd "$(dirname "$0")/.." || exit 1
@@ -211,9 +211,9 @@ output() {
         cd "${PROJECT}" || exit 1
 
         if [ ! -f "terraform.tfstate" ]; then
-            print_msg "${YELLOW}" "No terraform state found - project may not be deployed"
+            print_msg "${YELLOW}" "No OpenTofu state found - project may not be deployed"
         else
-            terraform output || print_msg "${YELLOW}" "No outputs available for ${PROJECT}"
+            tofu output || print_msg "${YELLOW}" "No outputs available for ${PROJECT}"
         fi
 
         cd - > /dev/null || exit 1
@@ -257,14 +257,14 @@ getkube() {
         cd "${PROJECT}" || exit 1
 
         if [ ! -f "terraform.tfstate" ]; then
-            print_msg "${YELLOW}" "No terraform state found - ${PROJECT} may not be deployed"
+            print_msg "${YELLOW}" "No OpenTofu state found - ${PROJECT} may not be deployed"
             cd - > /dev/null || exit 1
             continue
         fi
 
         # Get ssh_command output which contains the IP address
         local ssh_cmd
-        ssh_cmd=$(terraform output -raw ssh_command 2>/dev/null)
+        ssh_cmd=$(tofu output -raw ssh_command 2>/dev/null)
 
         if [ -z "$ssh_cmd" ] || [ "$ssh_cmd" = "Use AWS Systems Manager Session Manager to connect" ]; then
             print_msg "${YELLOW}" "WARNING: No SSH access configured for ${PROJECT}"
@@ -370,7 +370,7 @@ OPTIONS:
                 - Prompts for confirmation before proceeding
                 - CRITICAL: Respects Terraform state dependencies
 
-    output      Display terraform outputs from all deployed projects
+    output      Display OpenTofu outputs from all deployed projects
                 - Shows outputs in deployment order
                 - Useful for retrieving URLs, IPs, and other deployment information
 
@@ -397,7 +397,7 @@ DESTRUCTION ORDER:
 
 PREREQUISITES:
     - AWS CLI configured with valid credentials
-    - Terraform >= 1.5.0 installed
+    - OpenTofu >= 1.5.0 installed
     - SSH key pair generated
     - terraform.tfvars configured with your settings
 
@@ -405,7 +405,7 @@ EXAMPLES:
     # Deploy infrastructure
     $(basename "$0") build
 
-    # Display terraform outputs
+    # Display OpenTofu outputs
     $(basename "$0") output
 
     # Retrieve kubeconfig files

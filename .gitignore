@@ -1,4 +1,4 @@
-# Terraform files
+# OpenTofu/Terraform files
 *.tfstate
 *.tfstate.*
 *.tfvars
