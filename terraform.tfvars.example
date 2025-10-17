@@ -130,4 +130,4 @@ neuvector_version = "5.4.6"  # Latest stable version
 # Optional: AMI Override (all modules)
 # -----------------------------------------------------------------------------
 # Leave empty to use latest SUSE Linux Enterprise Server AMI
-ami_id = ""
+ami_id = "" # ami-0e4ba0f9cbbb667bc (SLES 15sp7 BYOS)
