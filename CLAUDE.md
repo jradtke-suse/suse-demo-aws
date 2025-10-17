@@ -63,7 +63,9 @@ Each module has its own `terraform.tfvars.example` file that should be copied to
 ## Key Technical Details
 
 ### Provider Requirements
-- OpenTofu >= 1.5.0
+- **OpenTofu >= 1.5.0** - Infrastructure provisioning tool
+  - Installation: https://opentofu.org/docs/intro/install/
+  - macOS: `brew install opentofu`
 - AWS Provider ~> 5.0
 - All modules use consistent default tags (Environment, Project, ManagedBy, Owner)
 

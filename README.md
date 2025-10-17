@@ -34,10 +34,12 @@ The demo environment is organized into separate OpenTofu modules:
 
 ## Prerequisites
 
-- SUSE Customer Center login and registration for SLES Hosts
-- AWS CLI configured with appropriate credentials (STS will work here)
-- A Top-Level Domain (TLD) hosted by AWS using route53 that you own/manage, and have permissions to modify records with your IAM principal.
-- OpenTofu >= 1.5.0
+- **OpenTofu >= 1.5.0** - Infrastructure provisioning tool
+  - macOS: `brew install opentofu`
+  - Other platforms: https://opentofu.org/docs/intro/install/
+- **SUSE Customer Center** login and registration for SLES Hosts
+- **AWS CLI** configured with appropriate credentials (STS will work here)
+- **Route53 Domain** - A Top-Level Domain (TLD) hosted by AWS that you own/manage, with permissions to modify records
 
 During the deployment you will need to provide or create:
 - SSH key pair for EC2 instances
