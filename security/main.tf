@@ -240,7 +240,7 @@ resource "aws_instance" "security" {
     encrypted             = true
   }
 
-  user_data = templatefile("${path.module}/user-data.sh", {
+  user_data_base64 = base64gzip(templatefile("${path.module}/user-data.sh", {
     neuvector_version         = var.neuvector_version
     suse_email                = var.suse_email
     suse_regcode              = var.suse_regcode
@@ -257,7 +257,7 @@ resource "aws_instance" "security" {
       hostname                = local.security_fqdn
       letsencrypt_environment = var.letsencrypt_environment
     }) : ""
-  })
+  }))
 
   tags = {
     Name = "${var.environment}-suse-security"
