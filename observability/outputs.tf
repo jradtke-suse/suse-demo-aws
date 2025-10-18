@@ -28,6 +28,11 @@ output "fqdn" {
   value       = var.create_route53_record ? local.observability_fqdn : null
 }
 
+output "observability_hostname" {
+  description = "Hostname used for SUSE Observability installation"
+  value       = local.observability_fqdn
+}
+
 output "route53_record" {
   description = "Route53 DNS record (if created)"
   value = var.create_route53_record && var.subdomain != "" && var.root_domain != "" ? {

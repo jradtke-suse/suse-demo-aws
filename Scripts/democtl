@@ -338,13 +338,36 @@ getkube() {
             "ec2-user@${ssh_host}:/home/ec2-user/.kube/config" "$output_file" 2>/dev/null; then
             print_msg "${GREEN}" "✓ Successfully retrieved kubeconfig for ${PROJECT}"
 
-            # Update the server address in kubeconfig to use the public IP
+            # Get the hostname from OpenTofu outputs (use consistent *_hostname naming)
+            local hostname=""
+            case "$PROJECT" in
+                "rancher-manager")
+                    hostname=$(tofu output -raw rancher_hostname 2>/dev/null)
+                    ;;
+                "observability")
+                    hostname=$(tofu output -raw observability_hostname 2>/dev/null)
+                    ;;
+                "security")
+                    hostname=$(tofu output -raw neuvector_hostname 2>/dev/null)
+                    ;;
+            esac
+
+            # Determine which server address to use (hostname if available, otherwise IP)
+            local server_address="${ssh_host}"
+            if [ -n "$hostname" ] && [ "$hostname" != "null" ]; then
+                server_address="$hostname"
+                print_msg "${GREEN}" "Using hostname: ${server_address}"
+            else
+                print_msg "${YELLOW}" "No hostname available, using public IP: ${server_address}"
+            fi
+
+            # Update the server address in kubeconfig
             if [ -f "$output_file" ]; then
                 # Use a temp file approach that works on both macOS and Linux
                 local temp_file="${output_file}.tmp"
-                if sed "s|127\.0\.0\.1:6443|${ssh_host}:6443|g; s|localhost:6443|${ssh_host}:6443|g" "$output_file" > "$temp_file"; then
+                if sed "s|127\.0\.0\.1:6443|${server_address}:6443|g; s|localhost:6443|${server_address}:6443|g" "$output_file" > "$temp_file"; then
                     mv "$temp_file" "$output_file"
-                    print_msg "${GREEN}" "✓ Updated server address to use public IP"
+                    print_msg "${GREEN}" "✓ Updated server address to: ${server_address}:6443"
                 else
                     print_msg "${YELLOW}" "⚠ Failed to update server address in kubeconfig"
                     rm -f "$temp_file"
