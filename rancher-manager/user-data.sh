@@ -211,12 +211,63 @@ done
 %{ endif ~}
 
 #######################################
+# Create cattle-system namespace and Certificate (if Let's Encrypt enabled)
+#######################################
+kubectl create namespace cattle-system || true
+
+%{ if enable_letsencrypt ~}
+echo "Creating Let's Encrypt Certificate for Rancher..."
+
+# Create the Certificate resource BEFORE installing Rancher
+cat <<'CERT_EOF' | kubectl apply -f -
+${letsencrypt_certificate}
+CERT_EOF
+
+echo "Certificate resource created - waiting for cert-manager to issue certificate..."
+
+#######################################
+# Monitor Certificate Issuance
+#######################################
+echo "=== Monitoring Certificate Issuance ==="
+timeout=300
+while [ $timeout -gt 0 ]; do
+    ready=$(kubectl get certificate rancher-tls -n cattle-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)
+
+    if [ "$ready" = "True" ]; then
+        echo "✓ Certificate rancher-tls issued successfully"
+        kubectl get certificate rancher-tls -n cattle-system
+        break
+    elif [ "$ready" = "False" ]; then
+        reason=$(kubectl get certificate rancher-tls -n cattle-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].message}' 2>/dev/null)
+        echo "⚠ Certificate issuance in progress: $reason"
+    fi
+
+    sleep 5
+    ((timeout--))
+done
+
+if [ "$ready" != "True" ]; then
+    echo "⚠ Certificate rancher-tls not ready within timeout - continuing anyway"
+    kubectl describe certificate rancher-tls -n cattle-system
+    kubectl describe certificaterequest -n cattle-system
+    kubectl describe order -n cattle-system
+    echo "Note: Rancher installation will proceed - certificate may complete in background"
+fi
+
+# Verify the TLS secret exists before installing Rancher
+echo "Verifying TLS secret exists..."
+if kubectl get secret tls-rancher-ingress -n cattle-system > /dev/null 2>&1; then
+    echo "✓ TLS secret tls-rancher-ingress exists"
+else
+    echo "⚠ TLS secret not found - Rancher ingress may have issues until certificate completes"
+fi
+%{ endif ~}
+
+#######################################
 # Install Rancher
 #######################################
 helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 helm repo update
-
-kubectl create namespace cattle-system || true
 
 %{ if enable_letsencrypt ~}
 # Install Rancher with external cert-manager (we manage certificates ourselves)
@@ -250,53 +301,11 @@ kubectl -n cattle-system wait --for=condition=available --timeout=600s deploymen
 echo "Waiting for Rancher pods to be ready..."
 kubectl -n cattle-system wait --for=condition=ready --timeout=600s pod -l app=rancher
 
-#######################################
-# Create Let's Encrypt Certificate (if enabled)
-#######################################
 %{ if enable_letsencrypt ~}
-echo "Creating Let's Encrypt Certificate for Rancher..."
-
-# Now that cattle-system namespace exists, create the Certificate resource
-cat <<'CERT_EOF' | kubectl apply -f -
-${letsencrypt_certificate}
-CERT_EOF
-
-echo "Certificate resource created for Rancher - cert-manager will request certificate from Let's Encrypt"
-
 #######################################
-# Monitor Certificate Issuance
-#######################################
-echo "=== Monitoring Certificate Issuance ==="
-timeout=300
-while [ $timeout -gt 0 ]; do
-    ready=$(kubectl get certificate rancher-tls -n cattle-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)
-
-    if [ "$ready" = "True" ]; then
-        echo "✓ Certificate rancher-tls issued successfully"
-        kubectl get certificate rancher-tls -n cattle-system
-        break
-    elif [ "$ready" = "False" ]; then
-        reason=$(kubectl get certificate rancher-tls -n cattle-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].message}' 2>/dev/null)
-        echo "⚠ Certificate issuance in progress: $reason"
-    fi
-
-    sleep 5
-    ((timeout--))
-done
-
-if [ "$ready" != "True" ]; then
-    echo "✗ Certificate rancher-tls failed to issue within timeout"
-    kubectl describe certificate rancher-tls -n cattle-system
-    kubectl describe certificaterequest -n cattle-system
-    kubectl describe order -n cattle-system
-    echo "Note: Certificate may still complete - check with: kubectl describe certificate rancher-tls -n cattle-system"
-fi
-
-#######################################
-# Validate HTTPS Endpoint
+# Validate HTTPS Endpoint with Let's Encrypt Certificate
 #######################################
 echo "=== Validating HTTPS Endpoint ==="
-endpoint="https://${hostname}"
 
 # Wait for DNS propagation
 echo "Waiting for DNS propagation..."
@@ -316,6 +325,14 @@ if command -v openssl >/dev/null 2>&1; then
     echo | openssl s_client -connect ${hostname}:443 -servername ${hostname} 2>/dev/null | \
       openssl x509 -noout -subject -issuer -dates 2>/dev/null || \
       echo "Note: TLS verification pending - DNS/certificate may still be propagating"
+fi
+
+# Final certificate status check
+cert_ready=$(kubectl get certificate rancher-tls -n cattle-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)
+if [ "$cert_ready" = "True" ]; then
+    echo "✓ Let's Encrypt certificate is ready and in use"
+else
+    echo "⚠ Certificate may still be finalizing - check: kubectl describe certificate rancher-tls -n cattle-system"
 fi
 %{ endif ~}
 
