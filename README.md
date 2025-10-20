@@ -52,7 +52,8 @@ During the deployment you will need to provide or create:
 Cut right to the chase...
 
 Demo Control / Demo Cuddle / Demo [Cuttle Fish?](https://en.wikipedia.org/wiki/Cuttlefish)... anyhow...
-I create Scripts/democtl to manage this demo in a more automated way.  I am mentioning this down here, ALL the way at the bottom, because I think you should do the deployment manually a few times to see what is actually happening.  **Then**... knock yerself out with the cuttle command.
+
+I created Scripts/democtl to manage this demo in a more automated way.  I am mentioning this down here, ALL the way at the bottom, because I think you should do the deployment manually a few times to see what is actually happening.  **Then**... knock yerself out with the cuttle command.
 
 Sync this this repo and cd in to it, update terraform.tfvars, then have some fun:
 ```
@@ -96,6 +97,8 @@ mkdir -p ~/Developer/Projects; cd $_
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
 cp ../terraform.tfvars.example terraform.tfvars # I store a "hydrated configuraiton" that has all the values populated
 cat terraform.tfvars
+Scripts/democtl build
+sleep 600 # Nap time... while it builds.
 ```
 
 Update key values (examples here):
