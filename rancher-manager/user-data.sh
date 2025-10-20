@@ -108,11 +108,13 @@ alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
 set -o vi
 EOF
 cp /etc/rancher/k3s/k3s.yaml /home/ec2-user/.kube/config
+# TEST - Added a PS1 var to test.  I'd like to see/know what system I am connected to
 cat << EOF | tee -a /home/ec2-user/.bashrc
 export KUBECONFIG=~/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
 set -o vi
+PS1="\u@\h - ${var.hostname_rancher} - \w \$ "
 EOF
 chown -R ec2-user /home/ec2-user/.kube
 
