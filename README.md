@@ -98,7 +98,16 @@ git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
 cp ../terraform.tfvars.example terraform.tfvars # I store a "hydrated configuraiton" that has all the values populated
 cat terraform.tfvars
 Scripts/democtl build
-sleep 600 # Nap time... while it builds.
+Scripts/democtl output | grep ssh_c # To get info to ssh to hosts
+
+# Display a countdown timer to wait for the cluster to (hopefully) be done building ;w
+countdown_seconds=360
+while [ "$countdown_seconds" -ge 0 ]; do
+    printf "\rTime remaining: %2d seconds \033[0K" "$countdown_seconds"
+    countdown_seconds=$((countdown_seconds - 1))
+    sleep 1
+done
+
 ```
 
 Update key values (examples here):
