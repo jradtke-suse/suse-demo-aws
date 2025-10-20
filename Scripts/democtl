@@ -253,6 +253,11 @@ output() {
 
         cd "${PROJECT}" || exit 1
 
+        # Initialize backend if needed (silent mode)
+        tofu init -backend=true > /dev/null 2>&1 || {
+            print_msg "${YELLOW}" "WARNING: Failed to initialize ${PROJECT}"
+        }
+
         tofu output
 
         cd - > /dev/null || exit 1
