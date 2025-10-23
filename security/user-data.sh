@@ -121,6 +121,7 @@ export KUBECONFIG=~/.kube/config
 alias kge='clear; kubectl get events --sort-by=.lastTimestamp'
 alias kgea='clear; kubectl get events -A --sort-by=.lastTimestamp'
 set -o vi
+PS1="\u@\h - ${hostname_short} - \w \$ "
 EOF
 chown -R ec2-user /home/ec2-user/.kube
 

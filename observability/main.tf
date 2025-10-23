@@ -243,6 +243,7 @@ resource "aws_instance" "observability" {
     smt_url                           = var.smt_url
     cert_manager_version              = var.cert_manager_version
     hostname                          = var.hostname_observability
+    hostname_short                    = var.hostname_observability
     subdomain                         = var.subdomain
     root_domain                       = var.root_domain
     enable_letsencrypt                = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != ""

@@ -249,6 +249,7 @@ resource "aws_instance" "security" {
     enable_letsencrypt        = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != ""
     letsencrypt_environment   = var.letsencrypt_environment
     hostname                  = local.security_fqdn
+    hostname_short            = var.hostname_security
     letsencrypt_clusterissuer = var.enable_letsencrypt && var.create_route53_record && var.letsencrypt_email != "" ? templatefile("${path.module}/letsencrypt-clusterissuer.yaml.tpl", {
       letsencrypt_email = var.letsencrypt_email
       aws_region        = var.aws_region
