@@ -230,6 +230,7 @@ resource "aws_instance" "rancher" {
     rancher_version            = var.rancher_version
     cert_manager_version       = var.cert_manager_version
     hostname                   = local.rancher_fqdn
+    hostname_short             = var.hostname_rancher
     suse_email                 = var.suse_email
     suse_regcode               = var.suse_regcode
     smt_url                    = var.smt_url
