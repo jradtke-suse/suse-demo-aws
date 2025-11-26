@@ -1,7 +1,7 @@
 # SUSE Demo Environment - AWS
 
 ## Purpose
-This repository contains OpenTofu projects to deploy a SUSE demo environment with a number of products running in AWS.  The infrastructure code here will deploy the core product with fundamental configuration needed.  After that, the demo requires some interactive updates via the WebUI or Kubernetes API.
+This repository contains OpenTofu projects to deploy a SUSE demo environment (Rancher Manager, SUSE Observability, SUSE Security) running in AWS.  The infrastructure code here will deploy the core product with fundamental configuration needed.  After that, the demo requires some interactive updates via the WebUI or Kubernetes API.
 
 This demo will have a cost associated with it - as it runs in AWS and I have opted to use SLES.  
 I  have published some cost estimates (with AWS Calculator output).  
@@ -41,21 +41,42 @@ The demo environment is organized into separate OpenTofu modules:
 - **Route53 Domain** - A Top-Level Domain (TLD) hosted by AWS that you own/manage, with permissions to modify records
 
 Optional Prerequisites: 
-- **SUSE Customer Center** login and registration for SLES Hosts, if you want Bring Your Own Subscription (BYOS)
-  - You may use AWS Marketplace Pay As You Go (PAYG) instead.  Just update the "ami_id" in your terraform.tfvars file.
+- **SUSE Customer Center** login and registration for SLES Hosts, you will use: Bring Your Own Subscription (BYOS)
 
 During the deployment you will need to provide or create:
 - SSH key pair for EC2 instances
 - HostedZoneId for your TLD
 
-## democtl
+## Managed/Automated Deployment
+
+### democtl
 Cut right to the chase...
 
 Demo Control / Demo Cuddle / Demo [Cuttle Fish?](https://en.wikipedia.org/wiki/Cuttlefish)... anyhow...
 
-I created Scripts/democtl to manage this demo in a more automated way.  I am mentioning this down here, ALL the way at the bottom, because I think you should do the deployment manually a few times to see what is actually happening.  **Then**... knock yerself out with the cuttle command.
+I created Scripts/democtl to manage this demo in a more automated way.  I do recommend that you do the deployment manually a few times to see what is actually happening.  **Then**... knock yerself out with the cuttle command.
 
-Sync this this repo and cd in to it, update terraform.tfvars, then have some fun:
+Sync this this repo and cd in to it, copy terraform.tfvars.example to terraform.tfvars and update it, then have some fun:
+
+```bash
+mkdir -p ~/Developer/Projects; cd $_
+# Archive existing demo directory
+[ -d "suse-demo-aws" ] && { i=1; while [ -d "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)" ]; do ((i++)); done; mv suse-demo-aws "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)"; }
+git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
+cp ../terraform.tfvars.example terraform.tfvars
+cat terraform.tfvars
+Scripts/democtl build
+
+# Display a countdown timer to wait for the cluster to (hopefully) be done building 
+countdown_seconds=360
+while [ "$countdown_seconds" -ge 0 ]; do
+    printf "\rTime remaining: %2d seconds \033[0K" "$countdown_seconds"
+    countdown_seconds=$((countdown_seconds - 1))
+    sleep 1
+done
+```
+
+And.. the fun
 ```
 EXAMPLES:
     # Deploy infrastructure
@@ -74,20 +95,21 @@ EXAMPLES:
     Scripts/democtl help
 ```
 
+## Manual Steps
 If you are more interested in some manual steps, continue reading...
 
-## Deployment Order
+### Deployment Order
 
 Deploy projects in the following order to ensure dependencies are met:
 
-1. **Shared Services** - Deploy first to create common infrastructure
+1. **Shared Services** - Deploy first to create common infrastructure (this is the only real dependency)
 2. **SUSE Rancher Manager** - Deploy Rancher for Kubernetes management
 3. **SUSE Observability** - Deploy monitoring stack
 4. **SUSE Security** - Deploy security components
 
-## Quick Start
+### Quick Start
 
-### 1. Download Repo and Configure Variables
+1. Download Repo and Configure Variables
 
 Note: I store a "hydrated configuraiton" that has all the values populated and just copy it in to my project directory
 
@@ -111,25 +133,7 @@ mkdir -p ~/Developer/Projects; cd $_
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
 cp ../terraform.tfvars.example terraform.tfvars 
 cat terraform.tfvars
-Scripts/democtl build
-Scripts/democtl output | grep ssh_c # To get info to ssh to hosts
-
-# Display a countdown timer to wait for the cluster to (hopefully) be done building ;w
-countdown_seconds=360
-while [ "$countdown_seconds" -ge 0 ]; do
-    printf "\rTime remaining: %2d seconds \033[0K" "$countdown_seconds"
-    countdown_seconds=$((countdown_seconds - 1))
-    sleep 1
-done
-
 ```
-
-Update key values (examples here):
-- `owner` - Your name/identifier
-- `ssh_public_key` - Your SSH public key
-- `suse_email` and `suse_regcode` - SUSE subscription details
-- `allowed_ssh_cidr_blocks` and `allowed_web_cidr_blocks` - Your IP for security
-- Instance types and sizes (if different from defaults)
 
 ### 2. Deploy Shared Services
 
