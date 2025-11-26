@@ -109,33 +109,13 @@ build() {
     # Check OpenTofu installation
     check_tofu
 
-    # Create and navigate to projects directory
-    mkdir -p "${PROJECTS_DIR}"
-    cd "${PROJECTS_DIR}" || exit 1
+    # Navigate to repository root (parent directory of Scripts)
+    cd "$(dirname "$0")/.." || exit 1
 
-    # Archive existing demo directory
-    archive_existing
-
-    # Clone repository
-    print_msg "${GREEN}" "Cloning repository..."
-    if ! git clone "${REPO_URL}"; then
-        print_msg "${RED}" "Failed to clone repository"
-        exit 1
-    fi
-
-    cd "${REPO_NAME}" || exit 1
-
-    # Setup terraform.tfvars
-    if [ -f "../terraform.tfvars.example" ]; then
-        print_msg "${YELLOW}" "Using hydrated configuration from parent directory"
-        cp ../terraform.tfvars.example terraform.tfvars
-    elif [ -f "./terraform.tfvars.example" ]; then
-        print_msg "${YELLOW}" "Copying terraform.tfvars.example - YOU MUST EDIT THIS FILE"
-        cp ./terraform.tfvars.example terraform.tfvars
-        print_msg "${RED}" "IMPORTANT: Edit terraform.tfvars with your configuration before proceeding"
-        read -p "Press Enter to continue after editing terraform.tfvars..."
-    else
-        print_msg "${RED}" "ERROR: No terraform.tfvars.example found"
+    # Verify we're in the correct directory
+    if [ ! -d "shared-services" ]; then
+        print_msg "${RED}" "ERROR: Cannot find project directories"
+        print_msg "${YELLOW}" "Current directory: $(pwd)"
         exit 1
     fi
 
