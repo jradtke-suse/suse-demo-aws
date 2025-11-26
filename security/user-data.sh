@@ -63,8 +63,20 @@ fi
 #######################################
 # Disable Docker (need to confirm this is necessary)
 #######################################
-systemctl disable docker.service --now
-systemctl disable docker.socket --now
+# Check if Docker is installed before attempting to disable it
+if systemctl list-unit-files | grep -q docker.service; then
+    echo "Docker service found - disabling..."
+    systemctl disable docker.service --now
+else
+    echo "Docker service not found - skipping disable"
+fi
+
+if systemctl list-unit-files | grep -q docker.socket; then
+    echo "Docker socket found - disabling..."
+    systemctl disable docker.socket --now
+else
+    echo "Docker socket not found - skipping disable"
+fi
 # If docker is running during the remainder of the install, it causes issues
 # namely, the enforcer-pod pulls a docker-specific image
 
@@ -410,11 +422,22 @@ fi
 %{ endif ~}
 
 # Install Trivy
-wget https://github.com/aquasecurity/trivy/releases/download/v0.56.2/trivy_0.56.2_Linux-64bit.rpm
-rpm -ivh trivy_0.56.2_Linux-64bit.rpm
+echo "Installing Trivy vulnerability scanner..."
+TRIVY_INSTALLED=false
+if wget https://github.com/aquasecurity/trivy/releases/download/v0.56.2/trivy_0.56.2_Linux-64bit.rpm; then
+    if rpm -ivh trivy_0.56.2_Linux-64bit.rpm; then
+        echo "Trivy installed successfully"
+        TRIVY_INSTALLED=true
+    else
+        echo "Failed to install Trivy RPM - continuing without it"
+    fi
+else
+    echo "Failed to download Trivy - continuing without it"
+fi
 
-# Create Trivy systemd service for server mode
-cat > /etc/systemd/system/trivy-server.service <<EOF
+# Create and start Trivy systemd service only if Trivy was installed
+if [ "$TRIVY_INSTALLED" = true ]; then
+    cat > /etc/systemd/system/trivy-server.service <<EOF
 [Unit]
 Description=Trivy Server
 After=network.target
@@ -429,10 +452,14 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-# Start Trivy server
-systemctl daemon-reload
-systemctl enable trivy-server
-systemctl start trivy-server
+    # Start Trivy server
+    systemctl daemon-reload
+    systemctl enable trivy-server
+    systemctl start trivy-server
+    echo "Trivy server started and enabled"
+else
+    echo "Skipping Trivy server setup - Trivy not installed"
+fi
 
 # Install Falco (runtime security)
 rpm --import https://falco.org/repo/falcosecurity-packages.asc
