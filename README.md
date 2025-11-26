@@ -89,13 +89,9 @@ Deploy projects in the following order to ensure dependencies are met:
 
 ### 1. Download Repo and Configure Variables
 
-Edit the root `terraform.tfvars` file with your settings:
-```bash
-cp terraform.tfvars.example terraform.tfvars
-```
 Note: I store a "hydrated configuraiton" that has all the values populated and just copy it in to my project directory
 
-I typically need to update the following values:
+Edit the root `terraform.tfvars` file with your settings, typically:
 
 * owner
 * ssh_public_key
@@ -107,7 +103,6 @@ I typically need to update the following values:
 * suse_observability_license
 * suse_observability_admin_password
 * neuvector_version
-
 
 ```bash
 mkdir -p ~/Developer/Projects; cd $_
