@@ -91,11 +91,30 @@ Deploy projects in the following order to ensure dependencies are met:
 
 Edit the root `terraform.tfvars` file with your settings:
 ```bash
+cp terraform.tfvars.example terraform.tfvars
+```
+Note: I store a "hydrated configuraiton" that has all the values populated and just copy it in to my project directory
+
+I typically need to update the following values:
+
+* owner
+* ssh_public_key
+* rancher_instance_type
+* route53_zone_id
+* letsencrypt_email
+* suse_email
+* suse_regcode
+* suse_observability_license
+* suse_observability_admin_password
+* neuvector_version
+
+
+```bash
 mkdir -p ~/Developer/Projects; cd $_
 # Archive existing demo directory
 [ -d "suse-demo-aws" ] && { i=1; while [ -d "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)" ]; do ((i++)); done; mv suse-demo-aws "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)"; }
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
-cp ../terraform.tfvars.example terraform.tfvars # I store a "hydrated configuraiton" that has all the values populated
+cp ../terraform.tfvars.example terraform.tfvars 
 cat terraform.tfvars
 Scripts/democtl build
 Scripts/democtl output | grep ssh_c # To get info to ssh to hosts
