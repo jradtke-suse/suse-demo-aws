@@ -39,8 +39,6 @@ The demo environment is organized into separate OpenTofu modules:
   - Other platforms: https://opentofu.org/docs/intro/install/
 - **AWS CLI** configured with appropriate credentials (STS will work here)
 - **Route53 Domain** - A Top-Level Domain (TLD) hosted by AWS that you own/manage, with permissions to modify records
-
-Optional Prerequisites: 
 - **SUSE Customer Center** login and registration for SLES Hosts, you will use: Bring Your Own Subscription (BYOS)
 
 During the deployment you will need to provide or create:
@@ -113,7 +111,7 @@ Deploy projects in the following order to ensure dependencies are met:
 
 Note: I store a "hydrated configuraiton" that has all the values populated and just copy it in to my project directory
 
-Edit the root `terraform.tfvars` file with your settings, typically:
+Copy terraform.tfvars.example to terraform.tfvars then, edit the file with your settings - typically:
 
 * owner
 * ssh_public_key
@@ -132,7 +130,7 @@ mkdir -p ~/Developer/Projects; cd $_
 [ -d "suse-demo-aws" ] && { i=1; while [ -d "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)" ]; do ((i++)); done; mv suse-demo-aws "suse-demo-aws-$(date +%F)-$(printf '%02d' $i)"; }
 git clone https://github.com/jradtke-suse/suse-demo-aws.git; cd suse-demo-aws
 cp ../terraform.tfvars.example terraform.tfvars 
-cat terraform.tfvars
+vi terraform.tfvars
 ```
 
 ### 2. Deploy Shared Services
